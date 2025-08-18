@@ -9,7 +9,7 @@ from get_files_config import URLS
 
 def main():
 
-    empresa = 'leroy' 
+    empresa = 'pluri' 
 
     url = URLS[empresa]
 
@@ -17,9 +17,12 @@ def main():
     df: DataFrame = FiletypesRequests.csv_request(url=url, save_file=False)
 
     formated_df = DataframeTreatment.treat_columns(df, empresa)
-    # print(formated_df)
 
-    formated_df.to_excel(f'data/default/prototipo_{empresa}.xlsx', index=False)
+    try: 
+        formated_df.to_excel(f'data/{empresa}/prototipo_{empresa}.xlsx', index=False)
+
+    except PermissionError as e:
+        print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')
 
 
 if __name__ == '__main__':

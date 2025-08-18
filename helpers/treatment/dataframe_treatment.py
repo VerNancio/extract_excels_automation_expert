@@ -124,10 +124,10 @@ class DataframeTreatment:
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
         'cids': {
-            'leroy': 'CID_PRINCIPAL', 'pluri': 'CID_PRINCIPAL'
+            'leroy': 'CID_ADICIONAL', 'pluri': 'CID_PRINCIPAL'
         },
         'cids_descricao': {
-            'leroy': 'DESCRICAO_CID', 'pluri': 'DESCRICAO_CID'
+            'leroy': 'DESCRICAO_CID_ADICIONAL', 'pluri': 'DESCRICAO_CID'
         },
         'cpf': {
             'leroy': 'CPF', 'pluri': 'CPF'

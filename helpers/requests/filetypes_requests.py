@@ -19,7 +19,7 @@ class FiletypesRequests:
         with open(path_with_file, 'wb') as f:
             f.write(content)
 
-        print(f"Arquivo baixado com sucesso: {filename}")
+        print(f"Arquivo baixado com sucesso: {filename}.{filetype}")
 
 
     @staticmethod
