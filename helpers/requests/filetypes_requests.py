@@ -23,14 +23,15 @@ class FiletypesRequests:
 
 
     @staticmethod
-    def file_request(url: str, 
+    def file_request(request_items: dict[str, dict], 
                      filename: str, 
                      filepath: str,
                      return_content: bool = True, 
                      save_file: bool = False, 
                      filetype: str = 'csv') -> bytes | Any | None:
         try:
-            res = req.get(url)
+            req_i = request_items
+            res = req.get(url=req_i['url'], params=req_i['params'], cookies=req_i['cookies'])
             res.raise_for_status()  # Levanta exceção para códigos de status de erro
 
             if save_file:
@@ -45,10 +46,10 @@ class FiletypesRequests:
 
 
     @staticmethod
-    def csv_request(url: str, filename: str = '', filepath: str = '', 
+    def csv_request(request_items: dict[str, dict], filename: str = '', filepath: str = '', 
                     return_content: bool = True, save_file: bool = False) -> DataFrame | None:
     
-        csv: bytes | Any = FiletypesRequests.file_request(url=url, return_content=return_content, filepath=filepath,
+        csv: bytes | Any = FiletypesRequests.file_request(request_items=request_items, return_content=return_content, filepath=filepath,
                                                           save_file=save_file, filename=filename, filetype='csv')
 
         if return_content:
@@ -58,10 +59,10 @@ class FiletypesRequests:
         
     
     @staticmethod
-    def json_request(url: str, filename: str = '', filepath: str = '', 
+    def json_request(request_items: dict[str, dict], filename: str = '', filepath: str = '', 
                     return_content: bool = True, save_file: bool = False) -> DataFrame | None:
     
-        json: bytes | Any = FiletypesRequests.file_request(url=url, return_content=return_content, filepath=filepath,
+        json: bytes | Any = FiletypesRequests.file_request(request_items=request_items, return_content=return_content, filepath=filepath,
                                                           save_file=save_file, filename=filename, filetype='json')
 
         if return_content:
@@ -71,9 +72,9 @@ class FiletypesRequests:
 
 
     @staticmethod
-    def xlsx_request(url: str, filename: str = '', filepath: str = '', 
+    def xlsx_request(request_items: dict[str, dict], filename: str = '', filepath: str = '', 
                      return_content: bool = True, save_file: bool = False) -> DataFrame | None:
-        xlsx: bytes | Any = FiletypesRequests.file_request(url=url, return_content=return_content, filepath=filepath,
+        xlsx: bytes | Any = FiletypesRequests.file_request(request_items=request_items, return_content=return_content, filepath=filepath,
                                                           save_file=save_file, filename=filename, filetype='xlsx')
 
         if return_content:

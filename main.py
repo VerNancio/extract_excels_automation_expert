@@ -1,20 +1,36 @@
 import requests as req
 import pandas as pd; from pandas import DataFrame;
+# import urllib
 
 from helpers.requests.filetypes_requests import FiletypesRequests
 from helpers.treatment.dataframe_treatment import DataframeTreatment
 
 from get_files_config import URLS
 
+from selenium_scrapying.rech.run import app
+
 
 def main():
 
-    empresa = 'pluri' 
+    res = app()
+    df = pd.DataFrame(res)
+    df.to_excel('./teste.xlsx')
+    print(df)
 
-    url = URLS[empresa]
+    empresa = 'greif' 
+
+    request_items = URLS[empresa]
+
+    # df = pd.read_json('./a.json')
+    # print(df['Protocolo - Funcionário - Matrícula '])
 
 
-    df: DataFrame = FiletypesRequests.csv_request(url=url, save_file=False)
+    return
+
+
+
+
+    df: DataFrame = FiletypesRequests.csv_request(request_items=request_items, save_file=True, return_content=False)
 
     formated_df = DataframeTreatment.treat_columns(df, empresa)
 
