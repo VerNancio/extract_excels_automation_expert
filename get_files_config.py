@@ -29,7 +29,8 @@ URLS = {
             'sc_apl_default_PlugBeneficios': 'Login_empresas%2C%20R',
             'PHPSESSID_': 'bmV0bWFrZT8yM2YwYmIzMTRiOTAxNmIw'
         }
-    }
+    },
+    'rech': {}
 }
 
 

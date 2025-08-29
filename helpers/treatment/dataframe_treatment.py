@@ -124,53 +124,69 @@ class DataframeTreatment:
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
         'cids': {
+            'rech': '', 
             'leroy': 'CID_ADICIONAL', 'pluri': 'CID_PRINCIPAL'
         },
         'cids_descricao': {
+            'rech': '', 
             'leroy': 'DESCRICAO_CID_ADICIONAL', 'pluri': 'DESCRICAO_CID'
         },
         'cpf': {
+            'rech': 'CPF', 
             'leroy': 'CPF', 'pluri': 'CPF'
         },
         'data_retorno': {
+            'rech': '', 
             'leroy': 'DT_FIM_ATESTADO', 'pluri': 'DT_FIM_ATESTADO'
         },
         'data_inicio': {
+            'rech': 'Data Inicial do afastamento', 
             'leroy': 'DT_INICIO_ATESTADO', 'pluri': 'DT_INICIO_ATESTADO'
         },
         'data_lancamento': None,
             # 'leroy': 'DT_CRIACAO', 'pluri': 'DT_CRIACAO' ########### DATA EM QUE SERA POSTO NA PLANILHA
         'estado_prestador': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'hora_fim': {
+            'rech': '', 
             'leroy': 'HORA_FIM_ATESTADO', 'pluri': 'HORA_FIM_ATESTADO'
         },
         'hora_inicio': {
+            'rech': '', 
             'leroy': 'HORA_INICIO_ATESTADO', 'pluri': 'HORA_INICIO_ATESTADO'
         },
         'identificador_prestador': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'local': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'nome_funcionario': {
+            'rech': 'Colaborador', 
             'leroy': 'NOME_FUNCIONARIO', 'pluri': 'NOME_FUNCIONARIO'
         },
         'nome_prestador': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'tipo': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'codigo_tipo': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'tipo_prestador': {
+            'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'matricula': {
+            'rech': '', 
             'leroy': 'MATRICULA_FUNC', 'pluri': 'MATRICULA_FUNC'
         }
     }
