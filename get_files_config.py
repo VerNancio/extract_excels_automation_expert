@@ -1,8 +1,16 @@
 
 
-URLS = {
-    'pluri': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"388105","codigo":"207673","chave":"edb0300b0ad29e39b6b4","tipoSaida":"csv","empresaTrabalho":"592252","dataInicio":"01/07/2025","dataFim":"30/07/2025"}',
-    'leroy': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"559244","codigo":"207809","chave":"70015e7cc0b729e0a598","tipoSaida":"csv","empresaTrabalho":"560416","dataInicio":"01/07/2025","dataFim":"30/07/2025"}',
+REQUESTS = {
+    'pluri': {
+        'url': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"388105","codigo":"207673","chave":"edb0300b0ad29e39b6b4","tipoSaida":"csv","empresaTrabalho":"592252","dataInicio":"19/08/2025","dataFim":"30/08/2025"}',
+        'params': '',
+        'cookies': ''
+    },
+    'leroy': {
+        'url': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"559244","codigo":"207809","chave":"70015e7cc0b729e0a598","tipoSaida":"csv","empresaTrabalho":"560416","dataInicio":"19/08/2025","dataFim":"30/08/2025"}',
+        'params': '',
+        'cookies': ''
+    },
     'greif': {
         # 'url': 'https://app.plugbeneficios.com.br/chamados_suporte_enduser_retorno_new/index.php',
         'url': 'https://app.plugbeneficios.com.br/chamados_suporte_enduser_retorno_new/index.php',

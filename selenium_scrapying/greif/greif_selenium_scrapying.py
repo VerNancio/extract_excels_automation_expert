@@ -1,6 +1,8 @@
 import os
 from time import sleep
 
+import pandas as pd
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -45,8 +47,11 @@ class GreifSeleniumScrapying:
             self.do_login()
             self.go_to_menu()
             self.add_filter()
-            self.export_and_download_csv()
+            # # self.export_and_download_csv()
+            self.export_and_download_json()
 
+            
+            self.treat_pre_save_temp_json()
             # scraped_data = self.get_func_data()
 
             # return scraped_data
@@ -118,6 +123,27 @@ class GreifSeleniumScrapying:
         sleep(2)
         self.driver.execute_script("arguments[0].click();", apply_filters_bttn)
 
+
+    def export_and_download_json(self) -> None:
+
+        csv_clickable_label = self.driver.find_element(By.CSS_SELECTOR, '#div_json_top > a')
+        self.driver.execute_script("arguments[0].click();", csv_clickable_label)
+
+        self.driver.switch_to.default_content()
+        self.driver.switch_to.frame('iframe_menu_administrador')
+        self.driver.switch_to.frame('TB_iframeContent')
+
+        csv_create_bttn = self.driver.find_element(By.ID, 'bok')
+        self.driver.execute_script("arguments[0].click();", csv_create_bttn)
+
+        self.driver.switch_to.default_content()
+        self.driver.switch_to.frame('iframe_menu_administrador')
+        sleep(2)
+
+        csv_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
+        self.driver.execute_script("arguments[0].click();", csv_download_bttn)
+        csv_download_bttn.click()
+
             
     def export_and_download_csv(self) -> None:
 
@@ -138,3 +164,30 @@ class GreifSeleniumScrapying:
         csv_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
         self.driver.execute_script("arguments[0].click();", csv_download_bttn)
         csv_download_bttn.click()
+
+    
+    def treat_pre_save_temp_json() -> pd.DataFrame:
+
+        df = pd.read_json('./data/greif/temp/chamados_suporte_enduser_retorno_new.json')
+
+        df = df.join(pd.json_normalize(df['Status / Prazos']))
+        df.drop(columns='Status / Prazos', inplace=True)
+
+        df = df.join(pd.json_normalize(df['Protocolo - Funcionário - Matrícula ']))
+        df.drop(columns='Protocolo - Funcionário - Matrícula ', inplace=True)
+
+        df = df.join(pd.json_normalize(df['Assunto - Tópicos - Descrição']))
+        df.drop(columns='Assunto - Tópicos - Descrição', inplace=True)
+
+        df = df.join(pd.json_normalize(df['Redirecionamentos']))
+        df.drop(columns='Redirecionamentos', inplace=True)
+
+        df['Prazo'] = df['Prazo'].str.strip().str.split(' ').str[0].astype('Int64')
+
+        df['Data Abertura'] = pd.to_datetime(df['Data Abertura']).dt.floor('D')
+        df['Data Encerramento'] = df['Data Abertura'] + pd.to_timedelta(df['Prazo'], unit='D')
+        df
+
+        df.drop(columns=df.columns[0], inplace=True)
+        
+        return df

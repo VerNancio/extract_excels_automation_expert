@@ -1,0 +1,27 @@
+[
+    {
+        "": "<img src=\"..\/_lib\/img\/grp__NM__ico__NM__statusOK.png\" alt=\"\" width=\"\" height=\"\">",
+        "Status \/ Prazos": {
+            "Status": "Pendente",
+            "Prazo": "5 dias úteis"
+        },
+        "Protocolo - Funcionário - Matrícula ": {
+            "Número Chamado": "20343",
+            "Funcionário": "JUSSARA BORA CAMARGO",
+            "Matrícula do Funcionário": "21059702",
+            "Data Abertura": "2025-09-01 17:09:31",
+            "Data Encerramento": null
+        },
+        "Empresa": "GREIF PARANA\/ARAUCARIA",
+        "Assunto - Tópicos - Descrição": {
+            "Responsável": "Expert",
+            "Assunto": "Atestado médico",
+            "Tópicos": "Envio de Atestado Médico",
+            "Descricao": "Atestado Médico"
+        },
+        "Redirecionamentos": {
+            "Data Redirecionamento": null,
+            "Responsável Redirecionado:": "Expert"
+        }
+    }
+]

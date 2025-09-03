@@ -47,33 +47,47 @@ class RechSeleniumScrapying:
         self.driver.get(url)
 
         username_input = self.driver.find_element(By.ID, 'username-input-field')
-        username_input.send_keys('Expert_Atestado')
+        for char in 'Expert_Atestado':
+            username_input.send_keys(char)
+            sleep(0.02)
 
+
+        sleep(2)
         next_bttn = self.driver.find_element(By.ID, 'nextBtn')
         next_bttn.click()
+
         sleep(2)
-
         pw_input = self.driver.find_element(By.ID, 'password-input-field')
-        pw_input.send_keys('123456@Senior')
-
+        for char in '123456@Senior':
+            pw_input.send_keys(char)
+            sleep(0.02)
+        
+        sleep(2)
         login_bttn = self.driver.find_element(By.ID, 'loginbtn')
         login_bttn.click()
-        sleep(2)
+        sleep(8)
 
 
 
-    def go_to_menu(self) -> None:
+    def go_to_menu(self) -> None:       
 
+        wait = WebDriverWait(self.driver, 30)
+
+        wait.until(EC.presence_of_element_located((By.ID, 'menu-item-Favoritos')))
         menu_favs_clickable = self.driver.find_element(By.ID, 'menu-item-Favoritos')
         menu_favs_clickable.click()
-        sleep(2)
+        sleep(3)
 
+        wait.until(EC.presence_of_element_located((By.ID, 'menu-item-Favoritos')))
         menu_favs_clickable_2 = self.driver.find_element(By.ID, 'apps-menu-item-0')
         menu_favs_clickable_2.click()
-        sleep(1)
+        sleep(3)
 
+        wait.until(EC.presence_of_element_located((By.ID, 'menu-item-Favoritos')))
         menu_favs_clickable_3 = self.driver.find_element(By.ID, 'apps-menu-item-0')
         menu_favs_clickable_3.click()
+        sleep(3)
+
 
 
     # def add_filter(self) -> None:
@@ -108,14 +122,17 @@ class RechSeleniumScrapying:
 
     def get_func_data(self) -> list[list[dict]]:
 
-        wait = WebDriverWait(self.driver, 15)
-        sleep(5)
+        wait = WebDriverWait(self.driver, 30)
 
+        sleep(5)
         wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "custom_iframe")))
 
         # Range deveria ser setado com base no numero de afastamentos, 
         # mas nao consegui captar ele de maneira fácil 
         for _ in range(600):
+
+            sleep(0.3)
+            # wait.until(EC.presence_of_element_located((By.CLASS_NAME, "ui-accordiontab-0-content")))
 
             data_box_items: list[WebElement] = self.driver.find_element(By.ID, 'ui-accordiontab-0-content') \
                                                                     .find_element(By.TAG_NAME, 'div') \

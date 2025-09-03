@@ -4,7 +4,7 @@ import pandas as pd; from pandas import DataFrame;
 from helpers.requests.filetypes_requests import FiletypesRequests
 from helpers.treatment.dataframe_treatment import DataframeTreatment
 
-from get_files_config import URLS
+from get_files_config import REQUESTS
 
 from selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapying
 from selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
@@ -12,24 +12,37 @@ from selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrap
 
 def main():
 
-    scraper = RechSeleniumScrapying()
-    scraper = GreifSeleniumScrapying()
-
-    data = scraper.run()
-
-    df = pd.DataFrame(data)
-
-    # return
-
     empresa = 'rech'
 
-    request_items = URLS[empresa]
+    if empresa == 'rech':
+        scraper = RechSeleniumScrapying()
+        data = scraper.run()
 
+        df = pd.DataFrame(data)
+
+    elif empresa == 'greif':
+        scraper = GreifSeleniumScrapying()
+        data = scraper.run()
+
+        df = pd.DataFrame(data)
+
+    elif empresa in ['leroy', 'pluri']:
+        # elif empresa == 'leroy':
+        request_items = REQUESTS[empresa]
+        # print(request_items)
+
+        df = FiletypesRequests.csv_request(request_items=request_items)
+        # print(df)
+    
 
     formated_df = DataframeTreatment.treat_columns(df, empresa)
 
+    print(formated_df)
+    formated_df = formated_df[formated_df['data_inicio'] > pd.Timestamp('18/08/2025')]
+    print(formated_df)
+
     try: 
-        formated_df.to_excel(f'data/{empresa}/prototipo_{empresa}.xlsx', index=False)
+        formated_df.to_excel(f'data/{empresa}/ATESTADOS_{empresa.upper()}_02-09-2025--teste.xlsx', index=False)
 
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')

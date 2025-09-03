@@ -21,15 +21,41 @@ class DataframeTreatment:
                     df[col] = df[col].astype(dtype)
 
         return df
-        
+    
+
+    @staticmethod
+    def rename_columns(df: DataFrame, client_name: str) -> DataFrame:
+
+        DT: Type[DataframeTreatment] = DataframeTreatment
+
+        df_columns: list[str] = df.columns.to_list()
+        c_names_dict: dict = DT.DEFAULT_COLUMNS_NAMES
+
+        df_to_return: DataFrame = DataFrame()
+
+        for default_c_name in c_names_dict:
+
+            # IF existe pq key data_lancamento esta como nome, ele serve pra add
+            # posteriormente no bloco for abaixo e manter o padrao de dicionarios
+            if default_c_name != 'data_lancamento':
+
+                # Acessa o dicionario dos nomes de colunas padrão
+                unpatterned_c_name: dict = c_names_dict[default_c_name][client_name]
+
+                # Renomeio das colunas para os nomes padrões
+                if unpatterned_c_name in df_columns:
+                    df_to_return[default_c_name] = df[unpatterned_c_name]
+
+        return df_to_return
+
     
     @staticmethod
-    def treat_columns(df: DataFrame, enterprise_name: str) -> DataFrame:
+    def treat_columns(df: DataFrame, client_name: str) -> DataFrame:
 
         DT: Type[DataframeTreatment] = DataframeTreatment
 
         df_to_return: DataFrame = DataFrame()
-        df_columns: list[str] = df.columns.to_list()
+        # df_columns: list[str] = df.columns.to_list()
 
         """  Dict tendo suas primeiras keys sendo os nomes de coluna padrão
         As segundas chaves sendo as empresas e seus valores sendo o nome das colunas que vem em seus arquivos
@@ -43,39 +69,55 @@ class DataframeTreatment:
         columns_to_change_type: list[str] = c_types_dict.keys()
         columns_to_be_treated: list[str] = DT.DEFAULT_TREATEMENTS.keys()
 
-        for default_c_name in c_names_dict:
 
-            # IF existe pq key data_lancamento esta como nome, ele serve pra add
-            # posteriormente no bloco for abaixo e manter o padrao de dicionarios
-            if default_c_name != 'data_lancamento':
-                unpatterned_c_name: dict = c_names_dict[default_c_name][enterprise_name]
+        df_to_return = DT.rename_columns(df, client_name)
 
-                # Renomeio das colunas para os nomes padrões
-                if unpatterned_c_name in df_columns:
-                    df_to_return[default_c_name] = df[unpatterned_c_name]
+        # Criação das colunas com dados vazios (pq a planilha básica não tem eles)
+        renamed_columns: list[str] = df_to_return.columns.to_list()
 
-            # Criação das colunas com dados vazios (pq a planilha básica não tem eles)
-            renamed_columns: list[str] = df_to_return.columns.to_list()
+        # Itera com os nomes padrões das colunas
+        for default_c_name in default_column_names:
 
-            # Itera com os nomes padrões das colunas
-            for default_c_name in default_column_names:
-                    
-                if default_c_name == 'data_lancamento':
-                    df_to_return = DT.add_current_date_column(df_to_return)
+            if default_c_name == 'data_lancamento':
+                # Data da criação do excel (data da execução desse script)
+                df_to_return = DT.add_current_date_column(df_to_return)
+                continue
 
-                elif default_c_name not in renamed_columns:
-                    # Cria uma coluna (se não existir) com nome padrão com valores nulo
-                    df_to_return[default_c_name] = np.nan
 
-                if default_c_name in columns_to_change_type:
-                    # Muda o tipo da coluna
-                    df_to_return[default_c_name] = DT.change_column_type(df_to_return, default_c_name)
+            # Item da chave do dicionario correpondente
+            c_name_value: str | None = c_names_dict[default_c_name][client_name] if default_c_name is not None else None
 
-                if default_c_name in columns_to_be_treated:
-                    # Trata os dados
-                    df_to_return[default_c_name] = DT.treat_column(df_to_return, default_c_name)
+            if default_c_name == 'dias_afastamento' and c_name_value is not None:
+                # print('!!!!!!!!!!!!!!!!!!!!', default_c_name, '--')
+                # Calcula a data de retorno baseado na quant de dias afastado
+                df_to_return['data_retorno'] = DT.add_return_date_column(df_to_return)
+
+            elif default_c_name not in renamed_columns and default_c_name != 'data_retorno':
+                # Cria uma coluna (se não existir) com nome padrão com valores nulo
+                df_to_return[default_c_name] = np.nan
+
+            if default_c_name in columns_to_change_type:
+                # Muda o tipo da coluna
+                df_to_return[default_c_name] = DT.change_column_type(df_to_return, default_c_name)
+
+            if default_c_name in columns_to_be_treated:
+                # Trata os dados
+                df_to_return[default_c_name] = DT.treat_column(df_to_return, default_c_name)
+
+        # Temporario -- tentativa de salvar o datetime com a data somente
+        df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
+        df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
+        # print(df_to_return['data_retorno'])
 
         return df_to_return
+    
+
+    @staticmethod
+    def add_columns_names(df: DataFrame) -> DataFrame:
+        """
+        Adiciona os nomes de cabeçalho de cada coluna, no caso de não existirem
+        """
+
 
 
     @staticmethod
@@ -89,6 +131,35 @@ class DataframeTreatment:
         df_to_return['data_lancamento'] = today.strftime("%d/%m/%Y")
 
         return df_to_return
+    
+
+    @staticmethod
+    def add_return_date_column(df: DataFrame) -> Series:
+
+        # Garante que a coluna existe
+        if 'dias_afastamento' not in df.columns:
+            raise KeyError("A coluna 'dias_afastamento' não existe no DataFrame")
+
+        # Converte para numérico, valores inválidos viram NaN
+        df['dias_afastamento'] = pd.to_numeric(df['dias_afastamento'], errors='coerce')
+
+        # df['data_inicio'] = df['data_inicio'].astype(str).str.strip().str.replace(r'[^0-9/]', '', regex=True)
+        
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
+
+        # Data caso nao haja data de retorno
+        # return_date_without_value = dt.datetime.strptime('31/12/1999', '%d/%m/%Y')
+
+        # Cria a nova coluna com a data de retorno
+        df['data_retorno'] = df.apply(
+            lambda row: (row['data_inicio'] + dt.timedelta(days=int(row['dias_afastamento'])))
+            if pd.notnull(row['dias_afastamento'])
+            # else return_date_without_value,
+            else row['dias_afastamento'],
+            axis=1
+        )
+
+        return df['data_retorno']
     
     
     @staticmethod
@@ -108,6 +179,9 @@ class DataframeTreatment:
         Aplica os tratamentos por meio da função lambdas indicadas pelas keys do dict
         Ex (cpf): 353.280.640-11 -> 35328064011
         """
+        if column_name == 'cpf':
+            df.dropna(subset=['cpf'], inplace=True)
+
         return df[column_name].apply(DataframeTreatment.DEFAULT_TREATEMENTS[column_name])
 
 
@@ -119,74 +193,95 @@ class DataframeTreatment:
 
     DEFAULT_TREATEMENTS: dict[str, Callable[[str], str]] = {
         'cids': lambda cid: re.sub(r"[.-]", "", str(cid)) if type(cid) != float else '',
-        'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11),
+        'cpf': lambda cpf:  re.sub(r"[.-]", "", str(cpf)).zfill(11) if cpf is not None else '',
     }
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
         'cids': {
+            'greif': '',
             'rech': '', 
             'leroy': 'CID_ADICIONAL', 'pluri': 'CID_PRINCIPAL'
         },
         'cids_descricao': {
+            'greif': '',    
             'rech': '', 
             'leroy': 'DESCRICAO_CID_ADICIONAL', 'pluri': 'DESCRICAO_CID'
         },
         'cpf': {
+            'greif': '',
             'rech': 'CPF', 
             'leroy': 'CPF', 'pluri': 'CPF'
         },
-        'data_retorno': {
-            'rech': '', 
-            'leroy': 'DT_FIM_ATESTADO', 'pluri': 'DT_FIM_ATESTADO'
+        'dias_afastamento': {
+            'greif': '',
+            'rech': 'Quantidade de Dias de Afastamento',
+            'leroy': None, 'pluri': ''
         },
         'data_inicio': {
+            'greif': 'Abertura',
             'rech': 'Data Inicial do afastamento', 
             'leroy': 'DT_INICIO_ATESTADO', 'pluri': 'DT_INICIO_ATESTADO'
+        },
+        'data_retorno': {
+            'greif': 'Data Encerramento',
+            'rech': '', 
+            'leroy': 'DT_FIM_ATESTADO', 'pluri': 'DT_FIM_ATESTADO'
         },
         'data_lancamento': None,
             # 'leroy': 'DT_CRIACAO', 'pluri': 'DT_CRIACAO' ########### DATA EM QUE SERA POSTO NA PLANILHA
         'estado_prestador': {
+            'greif': '',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'hora_fim': {
+            'greif': '',
             'rech': '', 
             'leroy': 'HORA_FIM_ATESTADO', 'pluri': 'HORA_FIM_ATESTADO'
         },
         'hora_inicio': {
+            'greif': '',
             'rech': '', 
             'leroy': 'HORA_INICIO_ATESTADO', 'pluri': 'HORA_INICIO_ATESTADO'
         },
         'identificador_prestador': {
+            'greif': '',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'local': {
-            'rech': '', 
+            'greif': 'Empresa',
+            'rech': 'Filial', 
             'leroy': '', 'pluri': ''
         },
         'nome_funcionario': {
+            'greif': '',
             'rech': 'Colaborador', 
             'leroy': 'NOME_FUNCIONARIO', 'pluri': 'NOME_FUNCIONARIO'
         },
         'nome_prestador': {
+            'greif': 'Funcionário',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'tipo': {
+            'greif': '',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'codigo_tipo': {
+            'greif': '',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'tipo_prestador': {
+            'greif': '',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
         'matricula': {
-            'rech': '', 
+            'greif': 'Matrícula do Funcionário',
+            'rech': 'Cadastro', 
             'leroy': 'MATRICULA_FUNC', 'pluri': 'MATRICULA_FUNC'
         }
     }
