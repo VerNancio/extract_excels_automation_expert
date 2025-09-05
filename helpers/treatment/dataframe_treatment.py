@@ -24,14 +24,15 @@ class DataframeTreatment:
     
 
     @staticmethod
-    def rename_columns(df: DataFrame, client_name: str) -> DataFrame:
+    def treat_and_rename_columns_names(df: DataFrame, client_name: str) -> DataFrame:
 
         DT: Type[DataframeTreatment] = DataframeTreatment
+        df_to_return: DataFrame = df
 
-        df_columns: list[str] = df.columns.to_list()
+
+        df_columns: list[str] = df_to_return.columns.to_list()
         c_names_dict: dict = DT.DEFAULT_COLUMNS_NAMES
 
-        df_to_return: DataFrame = DataFrame()
 
         for default_c_name in c_names_dict:
 
@@ -44,7 +45,8 @@ class DataframeTreatment:
 
                 # Renomeio das colunas para os nomes padrões
                 if unpatterned_c_name in df_columns:
-                    df_to_return[default_c_name] = df[unpatterned_c_name]
+                    df_to_return.rename(columns={unpatterned_c_name: default_c_name}, inplace=True)
+                    # df_to_return[default_c_name] = df[unpatterned_c_name]
 
         return df_to_return
 
@@ -54,10 +56,9 @@ class DataframeTreatment:
 
         DT: Type[DataframeTreatment] = DataframeTreatment
 
-        df_to_return: DataFrame = DataFrame()
-        # df_columns: list[str] = df.columns.to_list()
+        df_to_return: DataFrame = df
 
-        """  Dict tendo suas primeiras keys sendo os nomes de coluna padrão
+        """  Dict tendo suas primeiras keys sendo os nomes das coluna com o nome padrão
         As segundas chaves sendo as empresas e seus valores sendo o nome das colunas que vem em seus arquivos
         Ex: c_names_dict['cids']['leroy'] -> 'CID_PRINCIPAL'  """
         c_names_dict: dict = DT.DEFAULT_COLUMNS_NAMES
@@ -70,10 +71,11 @@ class DataframeTreatment:
         columns_to_be_treated: list[str] = DT.DEFAULT_TREATEMENTS.keys()
 
 
-        df_to_return = DT.rename_columns(df, client_name)
+        df_to_return = DT.treat_and_rename_columns_names(df_to_return, client_name)
 
         # Criação das colunas com dados vazios (pq a planilha básica não tem eles)
         renamed_columns: list[str] = df_to_return.columns.to_list()
+
 
         # Itera com os nomes padrões das colunas
         for default_c_name in default_column_names:
@@ -83,33 +85,40 @@ class DataframeTreatment:
                 df_to_return = DT.add_current_date_column(df_to_return)
                 continue
 
-
             # Item da chave do dicionario correpondente
-            c_name_value: str | None = c_names_dict[default_c_name][client_name] if default_c_name is not None else None
+            # c_name_value: str | None = c_names_dict[default_c_name][client_name] if default_c_name is not None else None
+            c_name_value: str | None = c_names_dict[default_c_name][client_name]
 
+            # Capaz que tenha que mudar o if abaixo pra elif e add um if antes 
+            # pra saber se a data de retorno já existe
             if default_c_name == 'dias_afastamento' and c_name_value is not None:
-                # print('!!!!!!!!!!!!!!!!!!!!', default_c_name, '--')
                 # Calcula a data de retorno baseado na quant de dias afastado
-                df_to_return['data_retorno'] = DT.add_return_date_column(df_to_return)
+                df_to_return = DT.add_return_date_column(df_to_return)
 
             elif default_c_name not in renamed_columns and default_c_name != 'data_retorno':
                 # Cria uma coluna (se não existir) com nome padrão com valores nulo
                 df_to_return[default_c_name] = np.nan
 
-            if default_c_name in columns_to_change_type:
-                # Muda o tipo da coluna
-                df_to_return[default_c_name] = DT.change_column_type(df_to_return, default_c_name)
+            # if default_c_name in columns_to_change_type:
+            #     # Muda o tipo da coluna
+            #     df_to_return[default_c_name] = DT.change_column_type(df_to_return, default_c_name)
 
             if default_c_name in columns_to_be_treated:
                 # Trata os dados
+                print(df_to_return.columns)
                 df_to_return[default_c_name] = DT.treat_column(df_to_return, default_c_name)
+
 
         # Temporario -- tentativa de salvar o datetime com a data somente
         df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
+        df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
+        
         df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
-        # print(df_to_return['data_retorno'])
+        df_to_return['data_retorno'] = df_to_return['data_retorno'].dt.strftime('%d/%m/%Y')
 
-        return df_to_return
+        df_to_return.loc[pd.isna(df_to_return['data_retorno']), 'data_retorno'] = dt.datetime(1999, 12, 31).strftime('%d/%m/%Y')
+
+        return df_to_return[list(default_column_names)]
     
 
     @staticmethod
@@ -121,21 +130,18 @@ class DataframeTreatment:
 
 
     @staticmethod
-    def add_current_date_column(df: DataFrame) -> DataFrame:
+    def add_current_date_column(df: DataFrame) -> Series:
         """
         Adiciona a coluna de data_lancamento com a data de hoje (quando idealmente será lançado no sharepoint)
         """
         df_to_return = df
-
-        today = dt.date.today()
-        df_to_return['data_lancamento'] = today.strftime("%d/%m/%Y")
+        df_to_return['data_lancamento'] = dt.date.today().strftime("%d/%m/%Y")
 
         return df_to_return
     
 
     @staticmethod
-    def add_return_date_column(df: DataFrame) -> Series:
-
+    def add_return_date_column(df: DataFrame) -> DataFrame:
         # Garante que a coluna existe
         if 'dias_afastamento' not in df.columns:
             raise KeyError("A coluna 'dias_afastamento' não existe no DataFrame")
@@ -143,23 +149,21 @@ class DataframeTreatment:
         # Converte para numérico, valores inválidos viram NaN
         df['dias_afastamento'] = pd.to_numeric(df['dias_afastamento'], errors='coerce')
 
-        # df['data_inicio'] = df['data_inicio'].astype(str).str.strip().str.replace(r'[^0-9/]', '', regex=True)
-        
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
+        # Converte datas (mais tolerante)
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce', dayfirst=True)
 
         # Data caso nao haja data de retorno
-        # return_date_without_value = dt.datetime.strptime('31/12/1999', '%d/%m/%Y')
+        return_date_without_value = dt.datetime(1999, 12, 31)
 
-        # Cria a nova coluna com a data de retorno
+        # Cria a nova coluna
         df['data_retorno'] = df.apply(
-            lambda row: (row['data_inicio'] + dt.timedelta(days=int(row['dias_afastamento'])))
+            lambda row: row['data_inicio'] + dt.timedelta(days=int(row['dias_afastamento']))
             if pd.notnull(row['dias_afastamento'])
-            # else return_date_without_value,
-            else row['dias_afastamento'],
+            else return_date_without_value,
             axis=1
         )
 
-        return df['data_retorno']
+        return df
     
     
     @staticmethod
@@ -179,11 +183,11 @@ class DataframeTreatment:
         Aplica os tratamentos por meio da função lambdas indicadas pelas keys do dict
         Ex (cpf): 353.280.640-11 -> 35328064011
         """
-        if column_name == 'cpf':
-            df.dropna(subset=['cpf'], inplace=True)
+        # if column_name == 'cpf':
+        #     df.loc[pd.isna(df['cpf'])].dropna(subset=['cpf'], inplace=True)
+        #     # loc[pd.isna(df_to_return['data_retorno']), 'data_retorno']
 
         return df[column_name].apply(DataframeTreatment.DEFAULT_TREATEMENTS[column_name])
-
 
     NECESSARY_COLUMNS: list[str] = ['cpf', 'data_inicio', 'data_fim', 'data_lancamento', 'nome_funcionario']
 
@@ -193,7 +197,9 @@ class DataframeTreatment:
 
     DEFAULT_TREATEMENTS: dict[str, Callable[[str], str]] = {
         'cids': lambda cid: re.sub(r"[.-]", "", str(cid)) if type(cid) != float else '',
-        'cpf': lambda cpf:  re.sub(r"[.-]", "", str(cpf)).zfill(11) if cpf is not None else '',
+        # 'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if not pd.isna(cpf) or str(cpf).lower() != 'nan' else '',
+        'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if pd.notna(cpf) else ''
+        # 'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if not pd.isna(cpf) else '',
     }
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
@@ -213,12 +219,12 @@ class DataframeTreatment:
             'leroy': 'CPF', 'pluri': 'CPF'
         },
         'dias_afastamento': {
-            'greif': '',
+            'greif': 'Prazo',
             'rech': 'Quantidade de Dias de Afastamento',
-            'leroy': None, 'pluri': ''
+            'leroy': None, 'pluri': None
         },
         'data_inicio': {
-            'greif': 'Abertura',
+            'greif': 'Data Abertura',
             'rech': 'Data Inicial do afastamento', 
             'leroy': 'DT_INICIO_ATESTADO', 'pluri': 'DT_INICIO_ATESTADO'
         },

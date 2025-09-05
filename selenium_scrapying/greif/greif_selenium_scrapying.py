@@ -1,11 +1,13 @@
 import os
+import shutil
 from time import sleep
 
-import pandas as pd
+import pandas as pd; from pandas import DataFrame, Series
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,7 +19,8 @@ from selenium.webdriver.support import expected_conditions as EC
 class GreifSeleniumScrapying:
 
     driver: WebDriver
-    filters: list[str] = ['Pendente', 'Responsável Redirecionado']
+    filters: list[str] = ['Pendente', 'Responsável Redirecionado']  
+    menu_window_handler: str
     
     def __init__(self):
         self.download_dir = "./data/greif/"
@@ -47,14 +50,19 @@ class GreifSeleniumScrapying:
             self.do_login()
             self.go_to_menu()
             self.add_filter()
-            # # self.export_and_download_csv()
             self.export_and_download_json()
 
-            
-            self.treat_pre_save_temp_json()
-            # scraped_data = self.get_func_data()
+            df: DataFrame = self.get_temp_json_df()
+            df = self.normalize_temp_json(df)
 
-            # return scraped_data
+            tickets_ids: Series = df.loc[:,'Número Chamado']
+            df = self.get_others_infos_by_tickets_ids(tickets_ids)
+
+
+            # Número Chamado
+            return
+
+            return df
 
         except Exception as e:
             print(f"Ocorreu um erro: {e}")
@@ -81,7 +89,6 @@ class GreifSeleniumScrapying:
         sleep(1)
 
         login_bttn = self.driver.find_element(By.CLASS_NAME, 'submit').find_element(By.TAG_NAME, 'input')
-        print(login_bttn.get_attribute('outerHTML'))
         login_bttn.click()
         sleep(2)
 
@@ -115,7 +122,6 @@ class GreifSeleniumScrapying:
 
             text = label_text.get_attribute('textContent').strip().split('  ')[0]
 
-            print(f'{self.filters} - {text}')
             if text in self.filters:
                 self.driver.execute_script("arguments[0].click();", clickable_checkbox)
                 sleep(1)
@@ -129,8 +135,8 @@ class GreifSeleniumScrapying:
         csv_clickable_label = self.driver.find_element(By.CSS_SELECTOR, '#div_json_top > a')
         self.driver.execute_script("arguments[0].click();", csv_clickable_label)
 
-        self.driver.switch_to.default_content()
-        self.driver.switch_to.frame('iframe_menu_administrador')
+        # self.driver.switch_to.default_content()
+        # self.driver.switch_to.frame('iframe_menu_administrador')
         self.driver.switch_to.frame('TB_iframeContent')
 
         csv_create_bttn = self.driver.find_element(By.ID, 'bok')
@@ -142,33 +148,16 @@ class GreifSeleniumScrapying:
 
         csv_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
         self.driver.execute_script("arguments[0].click();", csv_download_bttn)
+
+        shutil.rmtree(self.download_temp_dir)
         csv_download_bttn.click()
-
-            
-    def export_and_download_csv(self) -> None:
-
-        csv_clickable_label = self.driver.find_element(By.CSS_SELECTOR, '#div_csv_top > a')
-        self.driver.execute_script("arguments[0].click();", csv_clickable_label)
-
-        self.driver.switch_to.default_content()
-        self.driver.switch_to.frame('iframe_menu_administrador')
-        self.driver.switch_to.frame('TB_iframeContent')
-
-        csv_create_bttn = self.driver.find_element(By.ID, 'bok')
-        self.driver.execute_script("arguments[0].click();", csv_create_bttn)
-
-        self.driver.switch_to.default_content()
-        self.driver.switch_to.frame('iframe_menu_administrador')
-        sleep(2)
-
-        csv_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
-        self.driver.execute_script("arguments[0].click();", csv_download_bttn)
-        csv_download_bttn.click()
-
     
-    def treat_pre_save_temp_json() -> pd.DataFrame:
-
-        df = pd.read_json('./data/greif/temp/chamados_suporte_enduser_retorno_new.json')
+    def get_temp_json_df(self) -> DataFrame:
+        return pd.read_json('./data/greif/temp/chamados_suporte_enduser_retorno_new.json')
+        
+            
+    
+    def normalize_temp_json(self, df: DataFrame) -> DataFrame:
 
         df = df.join(pd.json_normalize(df['Status / Prazos']))
         df.drop(columns='Status / Prazos', inplace=True)
@@ -186,8 +175,60 @@ class GreifSeleniumScrapying:
 
         df['Data Abertura'] = pd.to_datetime(df['Data Abertura']).dt.floor('D')
         df['Data Encerramento'] = df['Data Abertura'] + pd.to_timedelta(df['Prazo'], unit='D')
-        df
 
         df.drop(columns=df.columns[0], inplace=True)
         
         return df
+    
+
+    def get_others_infos_by_tickets_ids(self, tickets_ids: Series):
+
+        wait = WebDriverWait(self.driver, 15)
+
+        for ticket_id in tickets_ids:
+            
+            sleep(2)
+            select_search_elmnt = self.driver.find_element(By.ID, 'fast_search_f0_top')
+            
+            select_search = Select(select_search_elmnt)
+            select_search.select_by_value('id_ticket')
+
+            sleep(2)
+            search_input = self.driver.find_element(By.ID, 'SC_fast_search_top')
+            search_input.clear()
+            search_input.send_keys(ticket_id)
+
+            sleep(2)
+            search_bttn = self.driver.find_element(By.ID, 'SC_fast_search_submit_top')
+            self.driver.execute_script("arguments[0].click();", search_bttn)
+
+            sleep(2)
+            register_row: WebElement = self.driver.find_elements(By.CLASS_NAME, 'scGridFieldOdd')[0]
+
+            edit_register_bttn = register_row.find_element(By.ID, 'bedit')
+            self.driver.execute_script("arguments[0].click();", edit_register_bttn)
+
+            sleep(2)
+            xlsx_export_bttn = self.driver.find_element(By.ID, 'sc_export_top')
+            self.driver.execute_script("arguments[0].click();", xlsx_export_bttn)
+
+            sleep(2)
+            self.driver.switch_to.frame('TB_iframeContent')
+
+            sleep(2)
+            xlsx_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
+            self.driver.execute_script("arguments[0].click();", xlsx_download_bttn)
+
+            sleep(2)
+            xlsx_download_bttn = self.driver.find_element(By.ID, 'idBtnBack')
+            self.driver.execute_script("arguments[0].click();", xlsx_download_bttn)
+
+            self.driver.switch_to.default_content()
+            self.driver.switch_to.frame('iframe_menu_administrador')
+
+            sleep(2)
+            xlsx_download_bttn = self.driver.find_element(By.ID, 'sc_b_sai_t')
+            self.driver.execute_script("arguments[0].click();", xlsx_download_bttn)
+
+
+

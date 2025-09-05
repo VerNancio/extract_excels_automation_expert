@@ -1,4 +1,4 @@
-
+CLIENTS_NAMES_LIST = ['leroy', 'rech', 'pluri', 'greif']
 
 REQUESTS = {
     'pluri': {
