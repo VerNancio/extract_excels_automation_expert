@@ -23,19 +23,19 @@ class GreifSeleniumScrapying:
     menu_window_handler: str
     
     def __init__(self):
-        self.download_dir = "./data/greif/"
-        self.download_temp_dir = f'{self.download_dir}/temp/'
-        
-        os.makedirs(self.download_dir, exist_ok=True)
-        # print(f"Pasta de downloads garantida em: {self.download_dir}")
+        self.download_dir_path = "./data/greif/"
+        self.download_temp_dir_path = os.path.join(self.download_dir_path, 'temp')
 
-        os.makedirs(self.download_temp_dir, exist_ok=True)
-        print(f"Pasta de download temporária garantida em: {self.download_temp_dir}")
+        os.makedirs(self.download_dir_path, exist_ok=True)
+        # print(f"Pasta de downloads garantida em: {self.download_dir_path}")
+
+        os.makedirs(self.download_temp_dir_path, exist_ok=True)
+        print(f"Pasta de download temporária garantida em: {self.download_temp_dir_path}")
         
         chrome_options = Options()
         chrome_options.add_experimental_option(
             "prefs", {
-                "download.default_directory": os.path.abspath(self.download_temp_dir),
+                "download.default_directory": os.path.abspath(self.download_temp_dir_path),
                 "download.prompt_for_download": False,
             }
         )
@@ -56,16 +56,14 @@ class GreifSeleniumScrapying:
             df = self.normalize_temp_json(df)
 
             tickets_ids: Series = df.loc[:,'Número Chamado']
-            df = self.get_others_infos_by_tickets_ids(tickets_ids)
+            self.get_others_infos_by_tickets_ids(tickets_ids)
 
-
-            # Número Chamado
-            return
+            df = self.merge_infos_into_df(df)
 
             return df
 
         except Exception as e:
-            print(f"Ocorreu um erro: {e}")
+            print(f"Ocorreu um erro: {e.with_traceback}")
 
         finally:
             self.driver.quit()
@@ -149,10 +147,11 @@ class GreifSeleniumScrapying:
         csv_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
         self.driver.execute_script("arguments[0].click();", csv_download_bttn)
 
-        shutil.rmtree(self.download_temp_dir)
+        shutil.rmtree(self.download_temp_dir_path)
         csv_download_bttn.click()
     
     def get_temp_json_df(self) -> DataFrame:
+        sleep(2)
         return pd.read_json('./data/greif/temp/chamados_suporte_enduser_retorno_new.json')
         
             
@@ -181,9 +180,7 @@ class GreifSeleniumScrapying:
         return df
     
 
-    def get_others_infos_by_tickets_ids(self, tickets_ids: Series):
-
-        wait = WebDriverWait(self.driver, 15)
+    def get_others_infos_by_tickets_ids(self, tickets_ids: Series) -> None:
 
         for ticket_id in tickets_ids:
             
@@ -193,33 +190,33 @@ class GreifSeleniumScrapying:
             select_search = Select(select_search_elmnt)
             select_search.select_by_value('id_ticket')
 
-            sleep(2)
+            sleep(1)
             search_input = self.driver.find_element(By.ID, 'SC_fast_search_top')
             search_input.clear()
             search_input.send_keys(ticket_id)
 
-            sleep(2)
+            sleep(1)
             search_bttn = self.driver.find_element(By.ID, 'SC_fast_search_submit_top')
             self.driver.execute_script("arguments[0].click();", search_bttn)
 
-            sleep(2)
+            sleep(1)
             register_row: WebElement = self.driver.find_elements(By.CLASS_NAME, 'scGridFieldOdd')[0]
 
             edit_register_bttn = register_row.find_element(By.ID, 'bedit')
             self.driver.execute_script("arguments[0].click();", edit_register_bttn)
 
-            sleep(2)
+            sleep(8)
             xlsx_export_bttn = self.driver.find_element(By.ID, 'sc_export_top')
             self.driver.execute_script("arguments[0].click();", xlsx_export_bttn)
 
-            sleep(2)
+            # sleep(1)
             self.driver.switch_to.frame('TB_iframeContent')
 
-            sleep(2)
+            sleep(1)
             xlsx_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
             self.driver.execute_script("arguments[0].click();", xlsx_download_bttn)
 
-            sleep(2)
+            sleep(1)
             xlsx_download_bttn = self.driver.find_element(By.ID, 'idBtnBack')
             self.driver.execute_script("arguments[0].click();", xlsx_download_bttn)
 
@@ -230,5 +227,31 @@ class GreifSeleniumScrapying:
             xlsx_download_bttn = self.driver.find_element(By.ID, 'sc_b_sai_t')
             self.driver.execute_script("arguments[0].click();", xlsx_download_bttn)
 
+
+    def merge_infos_into_df(self, df: DataFrame) -> DataFrame:
+
+        xlsx_temp_files = [
+            f for f in os.listdir(self.download_temp_dir_path)
+            if f.endswith('xlsx') and os.path.isfile(os.path.join(self.download_temp_dir_path, f))
+        ]
+
+
+        all_merged_dfs: list[DataFrame] = []
+
+        for file in xlsx_temp_files:
+
+            file_path: str = os.path.join(self.download_temp_dir_path, file)
+            print(file_path)
+
+            func_df: DataFrame = pd.read_excel(file_path)
+            print(func_df)
+            print(df)
+            print(func_df.columns)
+
+            all_merged_dfs.append(pd.merge(df, func_df, left_on='Funcionário', right_on='Cod Funcionario'))
+
+        merged_df = pd.concat(all_merged_dfs, ignore_index=True)
+
+        return merged_df
 
 

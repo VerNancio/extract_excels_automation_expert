@@ -93,9 +93,14 @@ class DataframeTreatment:
             # pra saber se a data de retorno já existe
             if default_c_name == 'dias_afastamento' and c_name_value is not None:
                 # Calcula a data de retorno baseado na quant de dias afastado
+                # print('!' *100)
+                print(default_c_name)
                 df_to_return = DT.add_return_date_column(df_to_return)
 
             elif default_c_name not in renamed_columns and default_c_name != 'data_retorno':
+                # print('?' *100)
+                print(default_c_name)
+
                 # Cria uma coluna (se não existir) com nome padrão com valores nulo
                 df_to_return[default_c_name] = np.nan
 
@@ -105,7 +110,6 @@ class DataframeTreatment:
 
             if default_c_name in columns_to_be_treated:
                 # Trata os dados
-                print(df_to_return.columns)
                 df_to_return[default_c_name] = DT.treat_column(df_to_return, default_c_name)
 
 
@@ -204,7 +208,7 @@ class DataframeTreatment:
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
         'cids': {
-            'greif': '',
+            'greif': 'Código(s) CID',
             'rech': '', 
             'leroy': 'CID_ADICIONAL', 'pluri': 'CID_PRINCIPAL'
         },
@@ -214,7 +218,7 @@ class DataframeTreatment:
             'leroy': 'DESCRICAO_CID_ADICIONAL', 'pluri': 'DESCRICAO_CID'
         },
         'cpf': {
-            'greif': '',
+            'greif': 'CPF do Funcionário',
             'rech': 'CPF', 
             'leroy': 'CPF', 'pluri': 'CPF'
         },
@@ -236,7 +240,7 @@ class DataframeTreatment:
         'data_lancamento': None,
             # 'leroy': 'DT_CRIACAO', 'pluri': 'DT_CRIACAO' ########### DATA EM QUE SERA POSTO NA PLANILHA
         'estado_prestador': {
-            'greif': '',
+            'greif': 'Estado',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
@@ -261,12 +265,12 @@ class DataframeTreatment:
             'leroy': '', 'pluri': ''
         },
         'nome_funcionario': {
-            'greif': '',
+            'greif': 'Funcionário',
             'rech': 'Colaborador', 
             'leroy': 'NOME_FUNCIONARIO', 'pluri': 'NOME_FUNCIONARIO'
         },
         'nome_prestador': {
-            'greif': 'Funcionário',
+            'greif': 'Nome do Médico',
             'rech': '', 
             'leroy': '', 'pluri': ''
         },
@@ -289,5 +293,10 @@ class DataframeTreatment:
             'greif': 'Matrícula do Funcionário',
             'rech': 'Cadastro', 
             'leroy': 'MATRICULA_FUNC', 'pluri': 'MATRICULA_FUNC'
+        },
+        'crm': {
+            'greif': 'Atestado Crm',
+            'rech': '', 
+            'leroy': '', 'pluri': ''
         }
     }
