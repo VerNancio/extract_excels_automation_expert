@@ -113,6 +113,9 @@ class DataframeTreatment:
                 df_to_return[default_c_name] = DT.treat_column(df_to_return, default_c_name)
 
 
+        df_to_return = DT.drop_nulls(df_to_return)
+
+
         # Temporario -- tentativa de salvar o datetime com a data somente
         df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
         df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
@@ -123,6 +126,16 @@ class DataframeTreatment:
         df_to_return.loc[pd.isna(df_to_return['data_retorno']), 'data_retorno'] = dt.datetime(1999, 12, 31).strftime('%d/%m/%Y')
 
         return df_to_return[list(default_column_names)]
+    
+
+    @staticmethod
+    def drop_nulls(df: DataFrame) -> DataFrame:
+
+        non_null_columns: list[str] = DataframeTreatment.NECESSARY_NON_NULL_VALUES
+
+        # for col in non_null_columns:
+
+        return df.dropna(subset=non_null_columns)
     
 
     @staticmethod
@@ -193,11 +206,17 @@ class DataframeTreatment:
 
         return df[column_name].apply(DataframeTreatment.DEFAULT_TREATEMENTS[column_name])
 
+
     NECESSARY_COLUMNS: list[str] = ['cpf', 'data_inicio', 'data_fim', 'data_lancamento', 'nome_funcionario']
 
     NECESSARY_EXPLICIT_TYPE_DECLARATION: dict[str] = {
         'cpf': str,
     }
+
+    NECESSARY_NON_NULL_VALUES: list[str] = [
+        'cpf',
+        'data_inicio'
+    ]
 
     DEFAULT_TREATEMENTS: dict[str, Callable[[str], str]] = {
         'cids': lambda cid: re.sub(r"[.-]", "", str(cid)) if type(cid) != float else '',

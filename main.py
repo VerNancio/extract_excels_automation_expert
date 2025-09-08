@@ -16,50 +16,53 @@ from selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrap
 
 def main(**kwargs):
 
-    empresa = kwargs["client_name"]
+    client_name = kwargs["client_name"]
 
-    if empresa not in CLIENTS_NAMES_LIST:
-        raise ValueError(f"KWarg do nome do cliente não possuí valor válido: {empresa}\n\n" + \
+    start_date_to_filter = kwargs['start_date'] if 'start_date' in kwargs.keys() else None
+
+
+    if client_name not in CLIENTS_NAMES_LIST:
+        raise ValueError(f"KWarg do nome do cliente não possuí valor válido: {client_name}\n\n" + \
                          f"Empresas disponíveis:\n {'\n'.join([f'{index + 1}. {client}' for index, client in enumerate(CLIENTS_NAMES_LIST)])}")
 
 
     start_date_to_filter: Timestamp | None 
 
-    if empresa == 'rech':
+    if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         data = scraper.run()
 
         df = pd.DataFrame(data)
 
-    elif empresa == 'greif':
+    elif client_name == 'greif':
         scraper = GreifSeleniumScrapying()
         data = scraper.run()
 
         df = pd.DataFrame(data)
         df.to_excel('./aa.xlsx')
 
-    elif empresa in ['leroy', 'pluri']:
-        request_items = REQUESTS[empresa]
+    elif client_name in ['leroy', 'pluri']:
+        request_items = REQUESTS[client_name]
 
         df = FiletypesRequests.csv_request(request_items=request_items)
 
-        start_date_to_filter = None
 
+    formated_df = DataframeTreatment.treat_columns(df, client_name)
 
-    formated_df = DataframeTreatment.treat_columns(df, empresa)
-
-    # print(formated_df)
-    # formated_df = formated_df[formated_df['data_inicio'] > start_date_to_filter]
-    # print(formated_df)
+    if start_date_to_filter:
+        start_date_to_filter = dt.datetime.strptime(start_date_to_filter, '%d/%m/%Y')
+        formated_df = formated_df.loc[
+            pd.to_datetime(formated_df['data_inicio'], format='%d/%m/%Y', errors='coerce') >= start_date_to_filter
+        ]
 
     try: 
         today = dt.date.today().strftime('%d_%m_%Y')
 
-        formated_df.to_excel(f'data/{empresa}/ATESTADOS_{empresa.upper()}_{today}.xlsx', index=False)
+        formated_df.to_excel(f'data/{client_name}/ATESTADOS_{client_name.upper()}_{today}.xlsx', index=False)
 
         # onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
-        # dir_path = os.path.join(onedrive_path, 'SmartReports', empresa.lower())
-        # file_path = os.path.join(dir_path, f'ATESTADOS_{empresa.upper()}_{today}.xlsx')
+        # dir_path = os.path.join(onedrive_path, 'SmartReports', client_name.lower())
+        # file_path = os.path.join(dir_path, f'ATESTADOS_{client_name.upper()}_{today}.xlsx')
 
         # formated_df.to_excel(file_path, index=False)
 

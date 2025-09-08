@@ -2,12 +2,12 @@ CLIENTS_NAMES_LIST = ['leroy', 'rech', 'pluri', 'greif']
 
 REQUESTS = {
     'pluri': {
-        'url': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"388105","codigo":"207673","chave":"edb0300b0ad29e39b6b4","tipoSaida":"csv","empresaTrabalho":"592252","dataInicio":"19/08/2025","dataFim":"30/08/2025"}',
+        'url': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"388105","codigo":"207673","chave":"edb0300b0ad29e39b6b4","tipoSaida":"csv","empresaTrabalho":"592252","dataInicio":"19/08/2025","dataFim":"08/09/2025"}',
         'params': '',
         'cookies': ''
     },
     'leroy': {
-        'url': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"559244","codigo":"207809","chave":"70015e7cc0b729e0a598","tipoSaida":"csv","empresaTrabalho":"560416","dataInicio":"19/08/2025","dataFim":"30/08/2025"}',
+        'url': 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"559244","codigo":"207809","chave":"70015e7cc0b729e0a598","tipoSaida":"csv","empresaTrabalho":"560416","dataInicio":"19/08/2025","dataFim":"08/09/2025"}',
         'params': '',
         'cookies': ''
     },
