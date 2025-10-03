@@ -39,6 +39,10 @@ class FiletypesRequests:
                                                     filepath=filepath, content=res.content)
 
             if return_content:
+
+                if res.content.decode("latin-1") == 'Período de datas maior que o permitido':
+                    raise Exception('Período de datas maior que o permitido')
+
                 return res.content 
 
         except req.exceptions.RequestException as e:

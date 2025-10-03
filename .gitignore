@@ -1,4 +1,16 @@
+# Ambiente virtual
 venv/
+.env/
+.venv/
+
+# Arquivos temporários do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de dados que não precisam ir pro git
+*.xlsx
+*.xls
+*.json
 *.html
-
-

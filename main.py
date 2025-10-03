@@ -1,83 +1,164 @@
 import os
 import sys
-import requests as req
-import pandas as pd; from pandas import DataFrame, Timestamp;
 import datetime as dt
-import json
+from dateutil.relativedelta import relativedelta
 
-from helpers.requests.filetypes_requests import FiletypesRequests
+import pandas as pd; from pandas import DataFrame, Timestamp;
+
+
+# from constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
+# from helpers.requests.make_requests.MakeRequests import CLIENTS_NAMES_LIST
+
+
+from helpers.tools.handle_kwargs import HandleKWargs
+
+from helpers.tools.date_formatter import DateFormatter
+# from helpers.tools.compare_date_filter import CompareDateFilter
+
+# from helpers.requests.filetypes_requests import FiletypesRequests
 from helpers.treatment.dataframe_treatment import DataframeTreatment
+from helpers.tools.store_excels import StoreSheets
 
-from get_files_config import REQUESTS, CLIENTS_NAMES_LIST
+
+from helpers.requests.make_requests.MakeCloseRequests import MakeCloseRequests
+from helpers.requests.make_requests.MakeJestorRequests import MakeJestorRequests
 
 from selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapying
 from selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
+from selenium_scrapying.merck.merck_selenium_scrapying import MerckSeleniumScrapying
+
 
 
 def main(**kwargs):
 
-    client_name = kwargs["client_name"]
+    handler = HandleKWargs(kwargs)
 
-    start_date_to_filter = kwargs['start_date'] if 'start_date' in kwargs.keys() else None
-
-
-    if client_name not in CLIENTS_NAMES_LIST:
-        raise ValueError(f"KWarg do nome do cliente não possuí valor válido: {client_name}\n\n" + \
-                         f"Empresas disponíveis:\n {'\n'.join([f'{index + 1}. {client}' for index, client in enumerate(CLIENTS_NAMES_LIST)])}")
+    client_name: str = handler.handle_non_existents_clients()
+    should_store_where: str = handler.handle_non_existents_storage_places()
+    report_type: str = handler.handle_non_existents_report_types()
 
 
-    start_date_to_filter: Timestamp | None 
+    date_formatter = DateFormatter()
+
+    date_to_filter: str = kwargs.get('date_to_filter', date_formatter.yesterday())
+    
+    start_date: str = kwargs.get('start_date', date_formatter.yesterday())
+    end_date: str = kwargs.get('end_date', date_formatter.yesterday())
+
 
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
-        data = scraper.run()
-
-        df = pd.DataFrame(data)
+        df: DataFrame = scraper.run()
+        # df = CompareDateFilter.is_equal(df, column_name='data_abertura', compare_date=date_to_filter)
 
     elif client_name == 'greif':
         scraper = GreifSeleniumScrapying()
-        data = scraper.run()
+        df: DataFrame = scraper.run(date_to_filter=date_to_filter)
 
-        df = pd.DataFrame(data)
-        df.to_excel('./aa.xlsx')
+    elif client_name == 'merck':
+        scraper = MerckSeleniumScrapying(user='p.gomes', pw='Merck@2026atestados', report_type=report_type)
+        df: DataFrame = scraper.run()
+
+    elif client_name in ['coop', 'copa', 'bimbo']:
+        print(start_date)
+        df = MakeCloseRequests.request_data(client_name=client_name, start_date=start_date)
+        print(df)
+
+    elif client_name in ['workon', 'sulnorte', 'ofy', 'rip']:
+
+        emails = {
+            'workon': 'afastamento@workongroup.com.br', 
+            'sulnorte': '', 
+            'ofy': '', 
+            'rip': ''
+        }
+
+        requester = MakeJestorRequests(client_name=client_name)
+        df = requester.run(sender_email=emails[client_name], row_post_date=date_to_filter)
 
     elif client_name in ['leroy', 'pluri']:
-        request_items = REQUESTS[client_name]
+        
+        pass
 
-        df = FiletypesRequests.csv_request(request_items=request_items)
+        # request_items: dict[str, str]
+        # print(date_to_filter)
+        # print(date_to_filter_month_added)
+        # match(client_name):
+        #     case 'leroy':
+        #         request_items = MakeRequests.make_leroy_request(start_date=date_to_filter, end_date=date_to_filter_month_added)
+        #     case 'pluri':
+        #         request_items = MakeRequests.make_pluri_request(start_date=date_to_filter, end_date=date_to_filter_month_added)
 
+        # # request_items['url'] = 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"388105","codigo":"208706","chave":"9c54b4e8660ab7cc0dc6","tipoSaida":"csv","empresaTrabalho":"592252","dataInicio":"02/09/2025","dataFim":"10/09/2025"}'
+        # print(request_items)
+        # df = FiletypesRequests.csv_request(request_items=request_items)
+        # print(df)
 
-    formated_df = DataframeTreatment.treat_columns(df, client_name)
+        # print(df['DT_CRIACAO'])
+        # df: DataFrame = CompareDateFilter.is_equal(df, column_name='DT_CRIACAO', compare_date=date_to_filter)
 
-    if start_date_to_filter:
-        start_date_to_filter = dt.datetime.strptime(start_date_to_filter, '%d/%m/%Y')
-        formated_df = formated_df.loc[
-            pd.to_datetime(formated_df['data_inicio'], format='%d/%m/%Y', errors='coerce') >= start_date_to_filter
-        ]
+    # Se o df retornou como None ou com 0 linhas, finaliza a execução
+    if df is None or df.shape[0] == 0:
+        print("0 registros capitados, xlsx não criado...")
+        return
 
+    # Faz o tratamento do df, retorna já pronto pra ser salvo
+    df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
+    
     try: 
-        today = dt.date.today().strftime('%d_%m_%Y')
+        if should_store_where == 'onedrive':
+            StoreSheets.store_in_onedrive(df=df_treated, client_name=client_name, report_type=report_type)
 
-        formated_df.to_excel(f'data/{client_name}/ATESTADOS_{client_name.upper()}_{today}.xlsx', index=False)
+        elif should_store_where == 'local':
+            StoreSheets.store_in_local_dir(df=df_treated, client_name=client_name, report_type=report_type)
 
-        # onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
-        # dir_path = os.path.join(onedrive_path, 'SmartReports', client_name.lower())
-        # file_path = os.path.join(dir_path, f'ATESTADOS_{client_name.upper()}_{today}.xlsx')
-
-        # formated_df.to_excel(file_path, index=False)
-
+        elif should_store_where == 'both':
+            StoreSheets.store_in_both(df=df_treated, client_name=client_name, report_type=report_type)
+            
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')
+    
+    except Exception as e:
+        print(f'Erro: {e}')
 
 
 if __name__ == '__main__':
 
-    kwargs_from_cmd = {}
-    for arg in sys.argv[1:]:
-        if ':' in arg:
-            key, value = arg.split(':', 1)
-            kwargs_from_cmd[key.lstrip('--')] = value
-        else:
-            raise ValueError("KWarg deve ser passado no formato: --client_name:<nome_da_empresa>")
+    keys = ['client_name', 'date_to_filter', 'start_date', 'end_date', 'should_store_where', 'report_type']
 
-    main(**kwargs_from_cmd)
+    help_msg = "KWarg deve ser passado no formato para cada item desta forma: \n" \
+                    "--client_name:<nome da empresa>\n" \
+                    "--date_to_filter:<data pra filtrar: dd/mm/YYYY>\n" \
+                    "--start_date:<data pra filtrar: dd/mm/YYYY>\n" \
+                    "--end_date:<data pra filtrar: dd/mm/YYYY>\n" \
+                    "--should_store_where:<local/onedrive/both>\n" \
+                    "--report_type:<'hour'/'date'>\n" 
+
+    kwargs = sys.argv[1:]
+
+    if any(help_arg in kwarg for help_arg in ['-h', '--h', '-help', '--help'] for kwarg in kwargs):
+        print(help_msg)
+        
+    else:
+
+        kwargs_from_cmd = {}
+        for arg in kwargs:
+            if ':' in arg:
+                key_not_striped, value = arg.split(':', 1)
+                key = key_not_striped.lstrip('--')
+
+                kwargs_from_cmd[key] = value
+
+                if key not in keys:
+                    err_msg: str = f"Chave enviada não é válida: {key}"
+                    raise ValueError(err_msg)
+                
+            else:
+                raise ValueError(help_msg)
+            
+        if 'client_name' not in kwargs_from_cmd:
+            raise Exception('Kwarg obrigatório "client_name" não foi enviado ou está com escrita incorreta.')
+            
+        main(**kwargs_from_cmd)
+
+    print('\nExecução finalizada.')

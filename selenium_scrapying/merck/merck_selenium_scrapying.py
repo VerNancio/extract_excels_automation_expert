@@ -1,5 +1,12 @@
-import os
-from time import sleep
+# import os
+# from urllib.request import urlretrieve
+# from time import sleep
+# import shutil
+import datetime as dt
+from bs4 import BeautifulSoup # pyright: ignore[reportMissingImports]
+import pandas as pd
+from pandas import DataFrame
+from io import StringIO
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -7,51 +14,43 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
+
+from helpers.tools.date_formatter import DateFormatter
+
 
 
 
 class MerckSeleniumScrapying:
-
-    driver: WebDriver
-    filters: list[str] = ['Pendente', 'Responsável Redirecionado']
     
-    def __init__(self):
-        self.download_dir = "./data/merck/"
-        self.download_temp_dir = f'{self.download_dir}/temp/'
+    driver: WebDriver
+    user: str
+    pw: str
+
+
+    def __init__(self, user: str, pw: str, report_type: str):
+
+        # Inicia o acesso ao navegador
+        self.driver = webdriver.Chrome()
+        self.user = user
+        self.pw = pw
+
+        if report_type in ('hour', 'date'):
+            self.report_type = report_type
+        else:
+            raise ValueError('Necessário passar "report_type" como "date" ou "hour"')
+
         
-        os.makedirs(self.download_dir, exist_ok=True)
-        # print(f"Pasta de downloads garantida em: {self.download_dir}")
-
-        os.makedirs(self.download_temp_dir, exist_ok=True)
-        print(f"Pasta de download temporária garantida em: {self.download_temp_dir}")
-        
-        chrome_options = Options()
-        chrome_options.add_experimental_option(
-            "prefs", {
-                "download.default_directory": os.path.abspath(self.download_temp_dir),
-                "download.prompt_for_download": False,
-            }
-        )
-        self.driver = webdriver.Chrome(options=chrome_options)
-
-
-    def run(self) -> list[list[dict]]:
+    def run(self, start_date: None = None, end_date: str = None) -> DataFrame:
 
         try:
-
             self.do_login()
-            self.go_to_menu()
-            self.add_filter()
-            self.export_and_download_csv()
+            df: DataFrame = self.get_all_reports_in_df(start_date, end_date)
 
-            
+            df = self.pre_treat_df(df)
 
-            scraped_data = self.get_func_data()
-            # print(scraped_data)
-
-            return scraped_data
+            return df
 
         except Exception as e:
             print(f"Ocorreu um erro: {e}")
@@ -63,82 +62,77 @@ class MerckSeleniumScrapying:
 
     def do_login(self) -> None:
 
-        url: str = 'https://app.plugbeneficios.com.br/dashboard_painel_RHlocal/?login=expert'
+        url: str = 'https://www.rhmed.com.br/evidamed/'
         
         self.driver.get(url)
 
-        username_input = self.driver.find_element(By.ID, 'id_sc_field_login')
-        username_input.clear()
-        username_input.send_keys('Expert')
-        sleep(1)
+        script = """
+        document.querySelector('input[name="usuario"]').value = arguments[0];
+        document.querySelector('input[name="senha"]').value = arguments[1];
+        document.querySelector('button#logar').click();
+        """
 
-        pw_input = self.driver.find_element(By.ID, 'id_sc_field_pswd')
-        pw_input.send_keys('expert24#')
-
-        login_bttn = self.driver.find_element(By.CLASS_NAME, 'submit').find_element(By.TAG_NAME, 'input')
-        print(login_bttn.get_attribute('outerHTML'))
-        login_bttn.click()
-        sleep(2)
+        self.driver.execute_script(script, self.user, self.pw)
 
 
+    def get_all_reports_in_df(self, start_date: None = None, end_date: str = None) -> DataFrame:
 
-    def go_to_menu(self) -> None:
+        # Redireciona pra página de menu de relatórios
+        self.driver.get('https://www.rhmed.com.br/evidamed/web/relatorio/Licenca%20Medica/LMPorData/frmLMPorData.asp')
 
-        first_menu_clickable = self.driver.find_element(By.CSS_SELECTOR, '.nav-item.Suporte.RH.webAPP')
-        first_menu_clickable.click()
-        sleep(2)
+        date_formatter = DateFormatter()
 
-        second_menu_clickable = self.driver.find_element(By.CSS_SELECTOR,  '.nav-item.Suporte.RH.webAPP .sub-menu li')
-        second_menu_clickable.click()
-        sleep(1)
+        start_date = start_date if start_date else date_formatter.last_month_first_day()
+        end_date = end_date if end_date else date_formatter.last_month_last_day()
 
-
-    def add_filter(self) -> None:
-
-        wait = WebDriverWait(self.driver, 15)
-
-        sleep(5)
-        wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "iframe_menu_administrador")))
-
-        status_filters_tab = self.driver.find_element(By.ID, 'id_tab_status_link')
-        all_status_filters_elemnt: list[WebElement] = status_filters_tab.find_elements(By.CLASS_NAME, 'scGridRefinedSearchCampo')
-        apply_filters_bttn: WebElement = self.driver.find_element(By.ID, 'id_toolbar_status') \
-                                                           .find_element(By.ID, 'app_int_search_status')
-
-        print(apply_filters_bttn.get_attribute('outerHTML'))
-
-        for elemnt in all_status_filters_elemnt:
-            label_text = elemnt.find_element(By.CLASS_NAME, 'scGridRefinedSearchCampoFont')
-            clickable_checkbox = elemnt.find_element(By.CLASS_NAME, 'scAppDivToolbarInput')
-
-            # Captura o texto do filtro
-            text = label_text.get_attribute('textContent').strip().split('  ')[0]
-
-            print(f'{self.filters} - {text}')
-            if text in self.filters:
-                self.driver.execute_script("arguments[0].click();", clickable_checkbox)
-                sleep(1)
-
-        sleep(2)
-        self.driver.execute_script("arguments[0].click();", apply_filters_bttn)
-
+        # Redireciona pra página com todos os registros em html
+        if self.report_type == 'date':
+            self.driver.get(f'https://www.rhmed.com.br/evidamed/web/relatorio/Licenca%20Medica/LMPorData/procRelLmPorData.asp?destino=0&ordem=&regional=&filial=&setor=&datInicial={start_date}&datFinal={end_date}&=&=&=&=&')
+        elif self.report_type == 'hour':
+            self.driver.get(f'https://www.rhmed.com.br/evidamed/web/Relatorio/Licenca%20Medica/LMporHora/index.asp?f.codEmpresa=&f.de=&f.codFilial=&f.datInicial={start_date}&f.datTermino={end_date}&f.tipoPesquisaTexto=0&f.dscNome=&action=Consultar&_target=result&_=1759344420945')
             
-    def export_and_download_csv(self) -> None:
+        html = self.driver.page_source
+        soup = BeautifulSoup(html, "lxml")
 
-        csv_clickable_label = self.driver.find_element(By.CSS_SELECTOR, '#div_csv_top > a')
-        self.driver.execute_script("arguments[0].click();", csv_clickable_label)
+        # Verifica se há tabelas
+        tables = soup.find_all("table")
 
-        self.driver.switch_to.default_content()
-        self.driver.switch_to.frame('iframe_menu_administrador')
-        self.driver.switch_to.frame('TB_iframeContent')
+        if not tables:
+            print("Nenhuma tabela encontrada na página.")
+            df = None
+        else:
+            tables_str = str(tables)
+            df_list = pd.read_html(StringIO(tables_str))
+            df = df_list[0][:-1]  # pega a primeira tabela e até a penúltima linha
 
-        csv_create_bttn = self.driver.find_element(By.ID, 'bok')
-        self.driver.execute_script("arguments[0].click();", csv_create_bttn)
+        return df
+    
+    
+    def pre_treat_df(self, df: DataFrame) -> DataFrame:
+        """
+        Pré tratamento que separa a coluna "CID" em "cids" e "cids_descricao",
+        serve somente caso esteja se buscando atestados por datas, já que os de horas não possuem cids
+        """
 
-        self.driver.switch_to.default_content()
-        self.driver.switch_to.frame('iframe_menu_administrador')
-        sleep(2)
+        # A primeiro string vazia ('') toma como pressuposto que cids sempre vão ter "-", ou, caso
+        # não tenham, será passado como "Não informado" ou talvez nulo  
 
-        csv_download_bttn = self.driver.find_element(By.ID, 'idBtnDown')
-        self.driver.execute_script("arguments[0].click();", csv_download_bttn)
-        csv_download_bttn.click()
+        if self.report_type == 'date':
+            df[['cids', 'cids_descricao']] = df['CID'].apply(
+                lambda x: pd.Series(x.split('-', 1)) if '-' in x else pd.Series(['', ''])
+            )
+
+            df['CPF'] = df['Nome.1']
+
+        else:
+            df['Data Início'] = df['Data']
+            df['Data Término'] = df['Data']
+
+            df.rename(columns={'Matricula': 'Matrícula'}, inplace=True)
+
+            df['cids'] = ''
+            df['cids_descricao'] = ''
+
+        df.loc[df['Conselho'] == '-', 'Conselho'] = ''
+        
+        return df
