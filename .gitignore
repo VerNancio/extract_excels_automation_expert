@@ -1,3 +1,6 @@
+# Json contendo as credenciais
+creadentials.json
+
 # Ambiente virtual
 venv/
 .env/
