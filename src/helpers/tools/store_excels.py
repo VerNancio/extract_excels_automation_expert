@@ -28,7 +28,7 @@ class StoreSheets:
             client_name (str): nome do cliente dos quais os dados dos atestados pertencem
             date (str): string de data que será usada no nome do xlsx salvo 
             date_in_name (bool): booleano que define se a data no nome do arquivo deve ser a data
-                                    a da variável date ou não
+                                    da variável date ou não
             report_type (str): string de tipo de de dados, se são atestados de horas ou de dias
         """
 

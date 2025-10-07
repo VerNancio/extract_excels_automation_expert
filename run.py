@@ -5,13 +5,14 @@ from src.main import main
 if __name__ == '__main__':
 
     keys = [
-        'client_name', 'date_to_filter', 'save_with_date_in_name', 
+        'client_name', 'date_to_filter', 'date_to_save', 'save_with_date_in_name', 
         'start_date', 'end_date', 'should_store_where', 'report_type'
     ]
 
     help_msg = "KWarg deve ser passado no formato para cada item desta forma: \n" \
                     "--client_name:<nome da empresa>\n" \
                     "--date_to_filter:<data pra filtrar: dd/mm/YYYY>\n" \
+                    "--date_to_save:<data pra salvar no nome do xlsx: dd/mm/YYYY>\n" \
                     "--start_date:<data pra filtrar: dd/mm/YYYY>\n" \
                     "--end_date:<data pra filtrar: dd/mm/YYYY>\n" \
                     "--should_store_where:<local/onedrive/both>\n" \

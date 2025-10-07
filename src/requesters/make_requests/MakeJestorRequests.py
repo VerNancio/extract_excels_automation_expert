@@ -17,11 +17,10 @@ from ...helpers.tools.get_credentials import get_credentials
 class MakeJestorRequests:
 
     client_name: str
-    table_hash: str
     sender_email: str
     list_size: int = 300
 
-    TABLE_HASH: str = 'd2f9e5824c2dfc1b00458'
+    TABLE_HASH: str = 'q2ie0_wclkdcxb10ih77n'
     AUTH_TOKEN: dict
     HEADERS: dict
 
@@ -40,7 +39,7 @@ class MakeJestorRequests:
         print(f"Pasta de downloads garantida em: {self.download_dir_path}")
 
 
-        self.AUTH_TOKEN = get_credentials('auth_token')
+        self.AUTH_TOKEN = get_credentials('jestor')['auth_token']
 
         self.HEADERS = {
             "Authorization": f"Bearer {self.AUTH_TOKEN}",
@@ -59,14 +58,18 @@ class MakeJestorRequests:
 
     def run(
             self,
-            sender_email: str = 'afastamento@workongroup.com.br',
-            table_hash: str = 'q2ie0_wclkdcxb10ih77n',
             row_post_date: str = dt.date.today().strftime('%Y-%m-%d')
             # list_size: int = 300,
             ) -> DataFrame | None:
         
-        self.sender_email = sender_email
-        self.table_hash = table_hash
+        emails: dict[str, str] = {
+            'workon': 'afastamento@workongroup.com.br', 
+            'sulnorte': '', 
+            'ofy': '', 
+            'rip': ''
+        }
+        
+        self.sender_email = emails[self.client_name]
         self.row_post_date = row_post_date
 
         df = self.download_and_save_xlsx_file() 
@@ -122,7 +125,7 @@ class MakeJestorRequests:
 
 
         payload = {
-            "object_type": self.table_hash,
+            "object_type": self.TABLE_HASH,
             "size": self.list_size,
             "select": [
                 "anexos",

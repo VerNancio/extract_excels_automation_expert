@@ -57,20 +57,23 @@ class MakeCloseRequests:
 
 
     @staticmethod
-    def request_data(client_name: str, start_date: str | None = None, end_date: str | None = None) -> DataFrame:
+    def request_data(client_name: str, start_date: str, end_date: str) -> DataFrame | None:
 
         if client_name not in ['coop', 'copa', 'bimbo']:
-            raise ValueError("Client_name passado como parametro iválido")
+            raise ValueError("Client_name passado como parametro inválido")
+        
+        # Apenas renomeia caso copa pra pesquisar com a url correta
+        if client_name == 'copa': client_name = 'copa-energia'
         
         token: str = MakeCloseRequests.get_bearer_token()
 
         date_formatter = DateFormatter(default_format='iso')
 
         start_date = date_formatter.format_date(start_date) if start_date is not None else date_formatter.today()
-        end_date = date_formatter.format_date(end_date) if end_date is not None else date_formatter.months_ahead(months=3)
+        end_date = date_formatter.format_date(end_date) if end_date is not None else date_formatter.today()
 
         params: str = f'export=true&format=xlsx&start_date={start_date}&end_date={end_date}&sync_status=error&sync_status=success&sync_status=not_sync&field_date=updated_at&status=valid'
-
+        
         headers = {
             "Authorization": f"Bearer {token}",
         }
@@ -85,6 +88,7 @@ class MakeCloseRequests:
 
         df: DataFrame = MakeCloseRequests.download_and_save_xlsx_file(url=url, client_name=client_name)
 
+        df.to_excel(f'./{client_name}.xlsx')
         return df
 
 

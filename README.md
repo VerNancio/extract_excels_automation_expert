@@ -1,13 +1,8 @@
-# extract_excels_automation_expert
-
-## 📦 Estrutura do Projeto
-
 ```text
-project/
-│
-├── .venv/                 # Ambiente virtual
-├── data/                  # Pasta para armazenar arquivos de saída
-├── scripts/               # Scripts de scraping
+extracao_planilhas_afastados/
+├── .venv
+├── data
+├── scripts
 │   └── main.py
-├── requirements.txt       # Dependências do projeto
+├── requirements.txt
 └── README.md

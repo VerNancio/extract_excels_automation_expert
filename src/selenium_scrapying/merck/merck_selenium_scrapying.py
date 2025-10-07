@@ -43,7 +43,7 @@ class MerckSeleniumScrapying:
             raise ValueError('Necessário passar "report_type" como "date" ou "hour"')
 
         
-    def run(self, start_date: None = None, end_date: str = None) -> DataFrame:
+    def run(self, start_date: None = None, end_date: str = None) -> DataFrame | None:
 
         try:
             self.do_login()

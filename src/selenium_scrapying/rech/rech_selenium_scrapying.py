@@ -31,7 +31,7 @@ class RechSeleniumScrapying:
 
 
         
-    def run(self) -> DataFrame:
+    def run(self) -> DataFrame | None:
 
         # try:
             self.do_login()

@@ -1,6 +1,6 @@
 import json
 
-def get_credentials(client_name: str) -> dict:
+def get_credentials(reference_name: str) -> dict:
     """
     Retorna dicionárizado as credenciais de login corresponte ao sistema de acesso do cliente informado
     """
@@ -9,6 +9,6 @@ def get_credentials(client_name: str) -> dict:
         json_content = f.read()
         json_dicted: dict = json.loads(json_content)
 
-        return json_dicted[client_name]
+        return json_dicted[reference_name]
 
 
