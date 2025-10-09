@@ -97,7 +97,6 @@ class DateFormatter:
         if new_format in self.default_formats:
             new_format = self.default_formats[new_format]
 
-            
 
         new_format = self.date_format if new_format is None else new_format
 
@@ -106,11 +105,16 @@ class DateFormatter:
         return dt_obj.strftime(new_format)
     
     
+    def to_datetime(self, date: str, current_format: str = '%d/%m/%Y') -> dt.datetime:
+        datetime = dt.datetime.strptime(date, current_format)
+        return datetime
+    
+    
     def last_working_day(self, return_in_datetime: bool = False) -> str | dt.date:
         date = self.yesterday(return_in_datetime=True)
         while date.weekday() >= 5:  # 5 = sábado, 6 = domingo
             date -= dt.timedelta(days=1)
-        
+            
         if return_in_datetime: 
             return date
         else: 

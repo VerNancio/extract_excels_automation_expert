@@ -33,7 +33,7 @@ class RechSeleniumScrapying:
         
     def run(self) -> DataFrame | None:
 
-        # try:
+        try:
             self.do_login()
             self.go_to_menu()
 
@@ -45,10 +45,10 @@ class RechSeleniumScrapying:
 
             return df
 
-        # except Exception as e:
+        except Exception as e:
             print(f"Ocorreu um erro: {e}")
 
-        # finally:
+        finally:
             self.driver.quit()
             print("Navegador fechado.")
 
@@ -115,12 +115,9 @@ class RechSeleniumScrapying:
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.count.ng-star-inserted')
         # ui-g-12 ng-star-inserted active
         pendent_quick_selector: WebElement = self.driver.find_element(By.CSS_SELECTOR, '.ui-g-12.ng-star-inserted.active')
-        print(pendent_quick_selector.get_attribute('outerHTML'))
         
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.ui-g-12.ng-star-inserted')
-
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.count.ng-star-inserted')
-
         
         # [print(span.get_attribute('outerHTML')) for span in pendent_quick_selector]
 
@@ -135,7 +132,6 @@ class RechSeleniumScrapying:
         # pending_num = int(pending_num_span.text) if pending_num_span else 0
         # print(pending_num_span.get_attribute('outerHTML'))
         # pending_num: int = int(pending_num_span.text)
-        print(pending_num)
 
         self.driver.switch_to.default_content()
 
@@ -202,8 +198,6 @@ class RechSeleniumScrapying:
 
         last_items_in_box_qnt = 0
         while last_items_in_box_qnt != (pending_num + 1): 
-
-            # print(f'{last_items_in_box_qnt} != {(pending_num + 1)}')
 
             try:
                 # ui-accordion-content

@@ -11,7 +11,7 @@ from .constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 from .helpers.tools.handle_kwargs import HandleKWargs
 
 from .helpers.tools.date_formatter import DateFormatter
-# from .helpers.tools.compare_date_filter import CompareDateFilter
+from .helpers.tools.compare_date_filter import CompareDateFilter
 
 # from .requesters.filetypes_requests import FiletypesRequests
 from .helpers.treatment.dataframe_treatment import DataframeTreatment
@@ -40,9 +40,13 @@ def main(**kwargs):
     date_formatter = DateFormatter()
     date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
     start_date: str = kwargs.get('start_date', date_formatter.last_working_day())
-    end_date: str = kwargs.get('end_date', date_formatter.last_working_day())
-
-
+    end_date: str = kwargs.get('end_date', date_formatter.yesterday())
+    
+    # Se a data de inicio for maior que a da de fim de busca
+    if date_formatter.to_datetime(start_date) > date_formatter.to_datetime(end_date):
+        raise ValueError("Data de início de busca maior que a final")
+        
+        
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         df: DataFrame = scraper.run()
@@ -67,6 +71,13 @@ def main(**kwargs):
     elif client_name in ['leroy', 'pluri']:
         requester = MakeSocRequests(client_name=client_name)
         df = requester.run(start_date=start_date, end_date=end_date)
+        
+        df = CompareDateFilter.is_beetween(
+            df,
+            column_name='dataFicha',
+            start_date=date_formatter.to_datetime(start_date),
+            end_date=date_formatter.to_datetime(end_date)
+        )
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
@@ -91,20 +102,6 @@ def main(**kwargs):
             should_store_where=should_store_where
         )
 
-        # if should_store_where == 'onedrive':
-        #     StoreSheets.store_in_onedrive(df=df_treated, client_name=client_name,
-        #                               date=date_to_filter, date_in_name=date_in_name, 
-        #                               report_typFe=report_type)
-
-        # elif should_store_where == 'local':
-        #     StoreSheets.store_in_local_dir(df=df_treated, client_name=client_name,
-        #                               date=date_to_filter, date_in_name=date_in_name, 
-        #                               report_type=report_type)
-
-        # elif should_store_where == 'both':
-        #     StoreSheets.store_in_both(df=df_treated, client_name=client_name,
-        #                               date=date_to_filter, date_in_name=date_in_name, 
-        #                               report_type=report_type)
             
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')

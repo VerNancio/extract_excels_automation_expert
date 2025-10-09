@@ -418,7 +418,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': None, 'pluri': None
+            'leroy': 'nomeSolicitante', 'pluri': 'nomeSolicitante'
         },
         'identificador_prestador': {
             'workon': 'Medico_Numero',
