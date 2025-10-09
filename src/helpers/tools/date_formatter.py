@@ -104,6 +104,17 @@ class DateFormatter:
         dt_obj = dt.datetime.strptime(date, current_format)
 
         return dt_obj.strftime(new_format)
+    
+    
+    def last_working_day(self, return_in_datetime: bool = False) -> str | dt.date:
+        date = self.yesterday(return_in_datetime=True)
+        while date.weekday() >= 5:  # 5 = sábado, 6 = domingo
+            date -= dt.timedelta(days=1)
+        
+        if return_in_datetime: 
+            return date
+        else: 
+            return date.strftime(self.date_format)
 
 
     def today(self, return_in_datetime: bool = False) -> str | dt.date:

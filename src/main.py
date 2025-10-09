@@ -38,9 +38,9 @@ def main(**kwargs):
 
 
     date_formatter = DateFormatter()
-    date_to_filter: str = kwargs.get('date_to_filter', date_formatter.yesterday())
-    start_date: str = kwargs.get('start_date', date_formatter.yesterday())
-    end_date: str = kwargs.get('end_date', date_formatter.yesterday())
+    date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
+    start_date: str = kwargs.get('start_date', date_formatter.last_working_day())
+    end_date: str = kwargs.get('end_date', date_formatter.last_working_day())
 
 
     if client_name == 'rech':
