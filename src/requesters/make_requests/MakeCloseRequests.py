@@ -62,7 +62,7 @@ class MakeCloseRequests:
         if client_name not in ['coop', 'copa', 'bimbo']:
             raise ValueError("Client_name passado como parametro inválido")
         
-        # Apenas renomeia caso copa pra pesquisar com a url correta
+        # Apenas renomeia caso o cliente seja copa pra pesquisar com a url correta
         if client_name == 'copa': client_name = 'copa-energia'
         
         token: str = MakeCloseRequests.get_bearer_token()
@@ -88,7 +88,6 @@ class MakeCloseRequests:
 
         df: DataFrame = MakeCloseRequests.download_and_save_xlsx_file(url=url, client_name=client_name)
 
-        df.to_excel(f'./{client_name}.xlsx')
         return df
 
 

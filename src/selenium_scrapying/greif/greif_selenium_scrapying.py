@@ -353,13 +353,11 @@ class GreifSeleniumScrapying:
                 .str.split(' ').str[0] # pega só a primeira parte
             )
 
-            print(df['Data Encerramento'])
+            print(df)
+            
             # df[['Data Encerramento', 'hora_fim']] = df['Data Encerramento'].str.strip().str.split(' ', n=1, expand=True)
-
-
             # df['Data Encerramento'] = df['Data Abertura'] + pd.to_timedelta(func_df['Quantidade de dias'], unit='D') \
             #                           if ['Data Encerramento'] is None else df['Data Encerramento']
-            
             # df['Data Encerramento'] = df['Data Encerramento'].astype(str).str.strip()
 
             all_merged_dfs.append(pd.merge(df, func_df, left_on='Funcionário', right_on='Cod Funcionario', how='inner'))

@@ -19,6 +19,7 @@ from .helpers.tools.store_excels import StoreSheets
 
 from .requesters.make_requests.MakeCloseRequests import MakeCloseRequests
 from .requesters.make_requests.MakeJestorRequests import MakeJestorRequests
+from .requesters.make_requests.MakeSocRequests import MakeSocRequests
 
 from .selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapying
 from .selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
@@ -64,17 +65,8 @@ def main(**kwargs):
         df = requester.run(row_post_date=date_to_filter)
 
     elif client_name in ['leroy', 'pluri']:
-        
-        pass
-        
-        # request_items: dict[str, str]
-        # match(client_name):
-        #     case 'leroy': request_items = MakeRequests.make_leroy_request(start_date=date_to_filter, end_date=date_to_filter_month_added)
-        #     case 'pluri': request_items = MakeRequests.make_pluri_request(start_date=date_to_filter, end_date=date_to_filter_month_added)
-
-        # # request_items['url'] = 'https://ws1.soc.com.br/WebSoc/exportadados?parametro={"empresa":"388105","codigo":"208706","chave":"9c54b4e8660ab7cc0dc6","tipoSaida":"csv","empresaTrabalho":"592252","dataInicio":"02/09/2025","dataFim":"10/09/2025"}'
-        # df = FiletypesRequests.csv_request(request_items=request_items)
-
+        requester = MakeSocRequests(client_name=client_name)
+        df = requester.run(start_date=start_date, end_date=end_date)
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:

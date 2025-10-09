@@ -58,9 +58,12 @@ class DataframeTreatment:
 
             # Se a coluna deve ser tratada e o c_name_value é diferente de nulo,
             # ou seja, ela existe, executa o tratamento de coluna
-            if default_c_name in columns_to_be_treated and c_name_value != None:
-                # Trata os dados
-                df_to_return[default_c_name] = DT.apply_treatments_column(df_to_return, default_c_name)
+            if default_c_name in columns_to_be_treated:
+                if c_name_value is None:
+                    df_to_return[default_c_name] = ''
+                else:
+                    # Trata os dados
+                    df_to_return[default_c_name] = DT.apply_treatments_column(df_to_return, default_c_name)
 
             if default_c_name == 'data_lancamento':
                 # Data da criação do excel (data da execução desse script)
@@ -252,7 +255,7 @@ class DataframeTreatment:
         # if column_name == 'cpf':
             # df.loc[pd.isna(df['cpf'])].dropna(subset=['cpf'], inplace=True)
             # loc[pd.isna(df_to_return['data_retorno']), 'data_retorno']
-
+            
         if column_name == 'cids':
             # Substitui valores NaN reais ou string "nan" por string vazia
             df.loc[df['cids'].isna() | (df['cids'].astype(str).str.lower() == "nan"), 'cids'] = ""
@@ -286,11 +289,14 @@ class DataframeTreatment:
 
     DEFAULT_TREATEMENTS: dict[str, Callable[[str], str]] = {
         'cids': lambda cid: re.sub(r"[.-]", "", str(cid)) 
-                            if type(cid) != float and pd.notna(cid) else '',
+                            if type(cid) != float and pd.notna(cid) and str(cid).lower().strip() not in ['none', 'nan'] 
+                            else '',
                             # if type(cid) != float and cid != 'nan' else '',
         'cids_descricao': lambda desc: re.sub(r'[^a-zA-Z0-9\s]', '', str(desc)) if pd.notna(desc) else desc,
         'codigo_tipo': lambda tipo: re.sub(r'[^a-zA-Z0-9\s]', ' ', str(tipo)) if pd.notna(tipo) else tipo,
-        'nome_funcionario': lambda name: name.lower(),
+        'nome_funcionario': lambda name: str(name).lower()
+                                         if pd.notna(name) and str(name).strip() != 'nan'
+                                         else '',
         # 'nome_prestador': lambda name: name.upper() if type(name) == str else '',
         # 'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if pd.notna(cpf) or pd.notnull(cpf) else '',
         'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if pd.notna(cpf) and cpf != 'nan' else '',
@@ -305,7 +311,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'CID_ADICIONAL', 'pluri': 'CID_PRINCIPAL'
+            'leroy': 'cids', 'pluri': 'cids '
         },
         'cids_descricao': {
             'workon': None,
@@ -325,7 +331,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'CPF', 'pluri': 'CPF'
+            'leroy': 'cpfFuncionario', 'pluri': 'cpfFuncionario'
         },
         'nome_funcionario': {
             'workon': 'Nome',
@@ -345,7 +351,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'MATRICULA_FUNC', 'pluri': 'MATRICULA_FUNC'
+            'leroy': 'matriculaFuncionario', 'pluri': 'matriculaFuncionario'
         },
         'dias_afastamento': {
             'workon': None,
@@ -365,7 +371,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'DT_INICIO_ATESTADO', 'pluri': 'DT_INICIO_ATESTADO'
+            'leroy': 'dataInicioAfastamento', 'pluri': 'dataInicioAfastamento'
         },
         'data_retorno': {
             'workon': 'Termino',
@@ -375,7 +381,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'DT_FIM_ATESTADO', 'pluri': 'DT_FIM_ATESTADO'
+            'leroy': 'dataFimAfastamento', 'pluri': 'dataFimAfastamento'
         },
         # 'data_lancamento': {
         #     'coop': '=',
@@ -422,7 +428,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': None, 'pluri': None
+            'leroy': 'codigoMedico', 'pluri': 'codigoMedico'
         },
         'estado_prestador': {
             'workon': None,
@@ -432,7 +438,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': None, 'pluri': None
+            'leroy': 'ufConselhoClasse', 'pluri': 'ufConselhoClasse'
         },
         'local': {
             'workon': 'LOCAL DE EMISSÃO',
@@ -452,7 +458,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': None, 'pluri': None
+            'leroy': 'descricaoMotivo', 'pluri': 'descricaoMotivo'
         },
         'codigo_tipo': {
             'workon': None,

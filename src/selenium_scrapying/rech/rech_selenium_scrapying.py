@@ -93,11 +93,13 @@ class RechSeleniumScrapying:
         menu_favs_clickable_2 = self.driver.find_element(By.ID, 'apps-menu-item-0')
         menu_favs_clickable_2.click()
         sleep(3)
+        
+        # while True: pass
 
-        wait.until(EC.presence_of_element_located((By.ID, 'menu-item-Favoritos')))
-        menu_favs_clickable_3 = self.driver.find_element(By.ID, 'apps-menu-item-0')
-        menu_favs_clickable_3.click()
-        sleep(3)
+        # wait.until(EC.presence_of_element_located((By.ID, 'menu-item-Favoritos')))
+        # menu_favs_clickable_3 = self.driver.find_element(By.ID, 'apps-menu-item-0')
+        # menu_favs_clickable_3.click()
+        # sleep(3)
 
     
     def get_pending_num(self) -> int:
@@ -113,6 +115,8 @@ class RechSeleniumScrapying:
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.count.ng-star-inserted')
         # ui-g-12 ng-star-inserted active
         pendent_quick_selector: WebElement = self.driver.find_element(By.CSS_SELECTOR, '.ui-g-12.ng-star-inserted.active')
+        print(pendent_quick_selector.get_attribute('outerHTML'))
+        
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.ui-g-12.ng-star-inserted')
 
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.count.ng-star-inserted')
@@ -124,10 +128,11 @@ class RechSeleniumScrapying:
         # pending_num_span: WebElement = spans[0]
         try:
             pending_num_span: WebElement =  pendent_quick_selector.find_element(By.CSS_SELECTOR, '.count.ng-star-inserted')
+            pending_num = int(pending_num_span.text)
         except NoSuchElementException:
-            pending_num_span = None
+            pending_num = 0
             
-        pending_num = int(pendent_quick_selector.text) if pending_num_span else 0
+        # pending_num = int(pending_num_span.text) if pending_num_span else 0
         # print(pending_num_span.get_attribute('outerHTML'))
         # pending_num: int = int(pending_num_span.text)
         print(pending_num)
@@ -236,6 +241,8 @@ class RechSeleniumScrapying:
 
         people_list: list[list[dict]] = []
         for item in clients_items:
+            
+            sleep(0.5)
 
             clickable = item.find_element(By.ID, 'clickable panel')
 
