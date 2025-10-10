@@ -46,6 +46,7 @@ class GreifSeleniumScrapying:
         )
         
         self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver.maximize_window()
         self.credentials = get_credentials('greif')
 
 
@@ -107,6 +108,8 @@ class GreifSeleniumScrapying:
     def go_to_menu(self) -> None:
 
         first_menu_clickable = self.driver.find_element(By.CSS_SELECTOR, '.nav-item.Suporte.RH.webAPP')
+        print(first_menu_clickable.get_attribute('outerHTML'))
+        input()
         first_menu_clickable.click()
         sleep(2)
 
@@ -124,8 +127,8 @@ class GreifSeleniumScrapying:
 
         wait = WebDriverWait(self.driver, 15)
 
-        sleep(2)
         wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "iframe_menu_administrador")))
+        sleep(2)
 
         status_filters_tab = self.driver.find_element(By.ID, 'id_tab_status_link')
         all_status_filters_elemnt: list[WebElement] = status_filters_tab.find_elements(By.CLASS_NAME, 'scGridRefinedSearchCampo')
