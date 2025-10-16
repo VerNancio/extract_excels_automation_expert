@@ -78,6 +78,7 @@ def main(**kwargs):
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
+        print(df)
         print("0 registros capitados, xlsx não criado...")
         return
 
@@ -88,7 +89,7 @@ def main(**kwargs):
         date_to_save: str = kwargs.get('date_to_filter', date_formatter.today())
 
         storager = StoreSheets()
-        
+
         folder_name = client_name
         storager.storage_data(
             df=df_treated, 

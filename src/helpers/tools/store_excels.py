@@ -106,7 +106,7 @@ class StoreSheets:
 
         filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
         file_path = os.path.join('data', client_name, filename)
-            
+                    
         df.to_excel(file_path, index=False)
 
         print(f'{date_to_save}: {df.shape[0]} registros salvos no diretório local do projeto...')

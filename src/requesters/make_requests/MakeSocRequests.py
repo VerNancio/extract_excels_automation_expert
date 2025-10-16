@@ -30,7 +30,7 @@ class MakeSocRequests:
 
         Args:
             expires_in_seconds (int): _segundos até xml expirar; default é 60; max é 120_
-            client_name (str): _nome da empresa cliente; "leroy" ou "pluri"_
+            client_name (str): _nome da empresa cliente; "leroy", "pluri" ou "leroy"_
         """
         
         self.client_name = client_name
@@ -54,8 +54,8 @@ class MakeSocRequests:
         # return
         
         date_formatter = DateFormatter()
-        start_search_date = date_formatter.months_ago(4)
-        end_search_date = date_formatter.months_ahead(4)
+        start_search_date = date_formatter.days_ago(5)
+        end_search_date = date_formatter.days_ahead(5)
         
         print(start_date)
         print(end_date)
@@ -73,6 +73,8 @@ class MakeSocRequests:
         )
         
         df = self.merge_funcs_infos(df=df)
+        print('1111111111111111111')
+        print(df)
         
         return df
 
@@ -88,7 +90,7 @@ class MakeSocRequests:
             case 'viva':
                 client_code = '592279'
             case _:
-                raise ValueError('Erro de parametro: "client_name" é inválido, favor passar como ou "pluri" ou "leroy"')
+                raise ValueError('Erro de parametro: "client_name" é inválido, favor passar como ou "pluri", "leroy" ou "viva"')
             
         # Nonce
         nonce_raw = os.urandom(16)
@@ -159,7 +161,8 @@ class MakeSocRequests:
         """
         all_clients_cod = {
             "leroy": "560416",
-            "pluri": "592252"
+            "pluri": "592252",
+            'viva': '592279'
         }
         
         client_cod = all_clients_cod[client_name]
@@ -171,7 +174,6 @@ class MakeSocRequests:
         json = res.json()
         df = DataFrame(json)
 
-        # input('...')
         df.rename(columns={
             'NOME': 'nomeFuncionario',
             'CPFFUNCIONARIO': 'cpfFuncionario'
@@ -267,9 +269,7 @@ class MakeSocRequests:
         }
         
         res = req.post(url=url, data=xml, headers=headers)
-        
         df = pd.read_xml(res.content,  xpath=".//Afastamento")
-        
         print(df)
         
         return df
