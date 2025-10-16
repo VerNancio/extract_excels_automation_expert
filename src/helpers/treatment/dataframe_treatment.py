@@ -311,7 +311,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'cids', 'pluri': 'cids '
+            'leroy': 'cidESocial', 'pluri': 'cidESocial '
         },
         'cids_descricao': {
             'workon': None,
@@ -341,7 +341,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'NOME_FUNCIONARIO', 'pluri': 'NOME_FUNCIONARIO'
+            'leroy': 'nomeFuncionario', 'pluri': 'nomeFuncionario'
         },
         'matricula': {
             'workon': 'Matricula RH',
@@ -418,7 +418,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'nomeSolicitante', 'pluri': 'nomeSolicitante'
+            'leroy': None, 'pluri': None
         },
         'identificador_prestador': {
             'workon': 'Medico_Numero',

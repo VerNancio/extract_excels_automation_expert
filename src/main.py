@@ -11,9 +11,9 @@ from .constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 from .helpers.tools.handle_kwargs import HandleKWargs
 
 from .helpers.tools.date_formatter import DateFormatter
-from .helpers.tools.compare_date_filter import CompareDateFilter
+from .helpers.tools.compare_date_filter import CompareDateFilter    
 
-# from .requesters.filetypes_requests import FiletypesRequests
+from .requesters.filetypes_requests import FiletypesRequests
 from .helpers.treatment.dataframe_treatment import DataframeTreatment
 from .helpers.tools.store_excels import StoreSheets
 
@@ -68,16 +68,13 @@ def main(**kwargs):
         requester = MakeJestorRequests(client_name=client_name)
         df = requester.run(row_post_date=date_to_filter)
 
-    elif client_name in ['leroy', 'pluri']:
+    elif client_name in ['leroy', 'pluri', 'viva']:
         requester = MakeSocRequests(client_name=client_name)
         df = requester.run(start_date=start_date, end_date=end_date)
-        
-        df = CompareDateFilter.is_beetween(
-            df,
-            column_name='dataFicha',
-            start_date=date_formatter.to_datetime(start_date),
-            end_date=date_formatter.to_datetime(end_date)
-        )
+        # print(df)
+        df.to_excel('./pluri.xlsx')
+        # print('\n\n\n\n')
+        # print(df['afastamentoHoras'])
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
@@ -88,11 +85,11 @@ def main(**kwargs):
     df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
     
     try: 
-
         date_to_save: str = kwargs.get('date_to_filter', date_formatter.today())
 
         storager = StoreSheets()
-
+        
+        folder_name = client_name
         storager.storage_data(
             df=df_treated, 
             client_name=client_name,

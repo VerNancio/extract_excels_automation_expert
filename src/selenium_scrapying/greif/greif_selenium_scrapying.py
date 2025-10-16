@@ -108,14 +108,13 @@ class GreifSeleniumScrapying:
     def go_to_menu(self) -> None:
 
         first_menu_clickable = self.driver.find_element(By.CSS_SELECTOR, '.nav-item.Suporte.RH.webAPP')
-        print(first_menu_clickable.get_attribute('outerHTML'))
-        input()
         first_menu_clickable.click()
         sleep(2)
-
+        
         second_menu_clickable = self.driver.find_element(By.CSS_SELECTOR,  '.nav-item.Suporte.RH.webAPP .sub-menu li')
         second_menu_clickable.click()
         sleep(1)
+        
 
 
     def add_filters(self, date_to_filter: str | None) -> bool:

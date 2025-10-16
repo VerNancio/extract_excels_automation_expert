@@ -1,5 +1,5 @@
 CLIENTS_NAMES_LIST = [
-    'leroy', 'rech', 'pluri', 'workon',
+    'leroy', 'rech', 'pluri', 'viva', 'workon',
     'greif', 'coop', 'copa', 'bimbo', 'merck',
     'sulnorte', 'rip', 'ofy'
 ]

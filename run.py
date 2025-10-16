@@ -1,8 +1,14 @@
 import sys
+import time
+
 from src.main import main
 
 
+
+
 if __name__ == '__main__':
+    
+    start_time = time.time()
 
     keys = [
         'client_name', 'date_to_filter', 'date_to_save', 'save_with_date_in_name', 
@@ -43,7 +49,11 @@ if __name__ == '__main__':
         if 'client_name' not in kwargs_from_cmd:
             raise Exception('Kwarg obrigatório "client_name" não foi enviado ou está com escrita incorreta.')
             
+        
             
         main(**kwargs_from_cmd)
+        
+    end_time = time.time()
 
     print('\nExecução finalizada.')
+    print(f"Tempo de execução: {end_time - start_time:.2f} segundos")
