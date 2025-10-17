@@ -160,7 +160,7 @@ class MakeSocRequests:
         all_clients_cod = {
             "leroy": "560416",
             "pluri": "592252",
-            'viva': '592279'
+            "viva": "592279"
         }
         
         client_cod = all_clients_cod[client_name]

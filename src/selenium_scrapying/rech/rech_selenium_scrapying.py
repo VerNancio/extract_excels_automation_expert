@@ -34,7 +34,7 @@ class RechSeleniumScrapying:
         
     def run(self) -> DataFrame | None:
 
-        try:
+        # try:
             self.do_login()
             self.go_to_menu()
 
@@ -43,13 +43,17 @@ class RechSeleniumScrapying:
 
             scraped_data = self.get_func_data(pending_num)
             df: DataFrame = pd.DataFrame(scraped_data)
+            
+            modelo_1_df = self.read_modelo_1()
+            df['CPF'] = self.merge_df_with_modelo_1(df, modelo_1_df)['CPF']
+            df.to_excel('rech.xlsx')
 
             return df
 
-        except Exception as e:
+        # except Exception as e:
             print(f"Ocorreu um erro: {e}")
 
-        finally:
+        # finally:
             self.driver.quit()
             print("Navegador fechado.")
 
@@ -332,13 +336,32 @@ class RechSeleniumScrapying:
         
         
     def read_modelo_1(self) -> DataFrame:
+        """_Retorna um Dataframe com todas as modelos 1 da Rech concatenadas_
+
+        Returns:
+            DataFrame: _Dataframe com todas as modelo 1 da Rech concatenadas_
+        """
         
-        pass
+        sharepoint_path: str = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
+        dir_path: str = os.path.join(sharepoint_path, 'Modelo I - Clientes com SOC', 'Grupo Rech')
+        filenames: list[str] = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
         
-        # sharepoint_path = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
-        # dir_path = os.path.join(sharepoint_path, 'Modelo I - Clientes com SOC', 'Extração Automatizada')
+        modelo_1_all_dfs: list[DataFrame] = [pd.read_excel(os.path.join(dir_path, f), skiprows=1) for f in filenames]
+        modelo_1_df: DataFrame = pd.concat(modelo_1_all_dfs, ignore_index=True)
+        
+        return modelo_1_df
+    
+    
+    def merge_df_with_modelo_1(self, df: DataFrame, modelo_1_df: DataFrame) -> DataFrame:
 
-        # filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
-
-
+        df.set_index('Colaborador')
+        modelo_1_df.set_index('Nome Funcionário')
+        
+        df_filled = df.combine_first(modelo_1_df).reset_index()
+        # merged_df = pd.merge(df, modelo_1_df, left_on='Colaborador', right_on='Nome Funcionário', how='')
+        
+        print(df_filled.columns.to_list())
+        print(df_filled[['CPF', 'Colaborador']])
+        
+        return df_filled
         

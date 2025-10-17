@@ -100,7 +100,6 @@ class DataframeTreatment:
         df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
         df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
         
-        # print(df_to_return['data_retorno'])
         df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
         df_to_return['data_retorno'] = df_to_return['data_retorno'].dt.strftime('%d/%m/%Y')
 
@@ -170,6 +169,9 @@ class DataframeTreatment:
         if 'dias_afastamento' not in df.columns:
             raise KeyError("A coluna 'dias_afastamento' não existe no DataFrame")
 
+        # Extrai somente o número de dias
+        df['dias_afastamento'] = df['dias_afastamento'].astype(str).str.extract(r'(\d+)')
+        
         # Converte para numérico, valores inválidos viram NaN
         df['dias_afastamento'] = pd.to_numeric(df['dias_afastamento'], errors='coerce')
 
@@ -191,18 +193,8 @@ class DataframeTreatment:
             lambda x: x['data_inicio'] + dt.timedelta(days=int(x['dias_afastamento'])),
             axis=1
         )
-
-
-        # print(df['data_retorno'])
-        # while True: pass
-
-        # # Cria a nova coluna ou adiciona data retorno caso a linha só tenha os dias de ausência
-        # df['data_retorno'] = df.apply(
-        #     lambda row: row['data_inicio'] + dt.timedelta(days=int(row['dias_afastamento']))
-        #     if pd.notnull(row['dias_afastamento']) and pd.isnull(row['data_retorno'])
-        #     else date_without_value,
-        #     axis=1
-        # )
+        
+        print(df[['data_inicio', 'dias_afastamento','data_retorno']])
 
         return df
     

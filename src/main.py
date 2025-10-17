@@ -79,7 +79,6 @@ def main(**kwargs):
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
-        print(df)
         print("0 registros capitados, xlsx não criado...")
         return
 
