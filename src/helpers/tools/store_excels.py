@@ -150,8 +150,6 @@ class StoreSheets:
         # onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
         # filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
 
-<<<<<<< HEAD
-        
         # onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
         # onedrive_path = os.path.join(os.environ['USERPROFILE'], '\EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA\Expert Ocupacional Externo - SmartReports\Bimbo\Extração Automatizada')
 
@@ -160,10 +158,7 @@ class StoreSheets:
 
         sharepoint_path = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
         dir_path = os.path.join(sharepoint_path, folder_name, 'Extração Automatizada')
-=======
-        sharepoint_path = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
-        dir_path = os.path.join(sharepoint_path, client_name.lower(), 'Extração Automatizada')
->>>>>>> f3edd9d911fd63f03d2c19b08f0a9c06980907bd
+
         filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
 
 
