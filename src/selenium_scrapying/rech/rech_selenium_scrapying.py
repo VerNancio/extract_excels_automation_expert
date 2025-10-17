@@ -1,3 +1,4 @@
+import os
 from time import sleep
 import datetime as dt
 import pandas as pd
@@ -136,7 +137,6 @@ class RechSeleniumScrapying:
         self.driver.switch_to.default_content()
 
         return pending_num
-
 
 
     def set_filter(self) -> None:
@@ -329,5 +329,16 @@ class RechSeleniumScrapying:
 
         apply_filters_bttn = self.driver.find_element(By.ID, 's-button-3')
         self.driver.execute_script("arguments[0].click();", apply_filters_bttn)
+        
+        
+    def read_modelo_1(self) -> DataFrame:
+        
+        pass
+        
+        # sharepoint_path = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
+        # dir_path = os.path.join(sharepoint_path, 'Modelo I - Clientes com SOC', 'Extração Automatizada')
+
+        # filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
+
 
         

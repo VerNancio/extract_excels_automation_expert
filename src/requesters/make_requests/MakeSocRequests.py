@@ -54,8 +54,8 @@ class MakeSocRequests:
         # return
         
         date_formatter = DateFormatter()
-        start_search_date = date_formatter.days_ago(5)
-        end_search_date = date_formatter.days_ahead(5)
+        start_search_date = date_formatter.months_ago(12)
+        end_search_date = date_formatter.months_ahead(12)
         
         print(start_date)
         print(end_date)
@@ -73,8 +73,7 @@ class MakeSocRequests:
         )
         
         df = self.merge_funcs_infos(df=df)
-        print('1111111111111111111')
-        print(df.columns)
+        print(df)
         
         return df
 
@@ -181,7 +180,7 @@ class MakeSocRequests:
         
         df['cpfFuncionario'] = df['cpfFuncionario'].astype(str)
         
-        return df.loc[0, ['nomeFuncionario', 'cpfFuncionario']].to_frame().T
+        return df.loc[0, ['nomeFuncionario', 'cpfFuncionario']].to_frame().T        
         
         
     def merge_funcs_infos(self, df: DataFrame) -> DataFrame:
@@ -196,9 +195,7 @@ class MakeSocRequests:
                 nomes[cpf] = func_df.loc[0, 'nomeFuncionario']
 
         df['nomeFuncionario'] = df['cpfFuncionario'].map(nomes)
-        
-        print(df)
-        
+                
         return df
         
         
@@ -270,7 +267,6 @@ class MakeSocRequests:
         
         res = req.post(url=url, data=xml, headers=headers)
         df = pd.read_xml(res.content,  xpath=".//Afastamento")
-        print(df)
         
         return df
     
