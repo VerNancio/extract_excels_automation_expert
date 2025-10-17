@@ -15,7 +15,7 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, SessionNotCreatedException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 
@@ -116,7 +116,11 @@ class SocSeleniumScrapying:
         
         login_bttn = self.driver.find_element(By.ID, 'bt_entrar')
         login_bttn.click()
-        sleep(2)
+        sleep(4)
+        
+        any_alerts_items: WebElement = self.driver.find_elements(By.CLASS_NAME, 'modalAlerta')
+        if len(any_alerts_items) > 0:
+            raise SessionNotCreatedException('Falha ao realizar login no SOC')
         
 
     def go_to_menu(self) -> None:       

@@ -44,6 +44,9 @@ class RechSeleniumScrapying:
             scraped_data = self.get_func_data(pending_num)
             df: DataFrame = pd.DataFrame(scraped_data)
             
+            if df.empty:
+                return None
+            
             modelo_1_df = self.read_modelo_1()
             df['CPF'] = self.merge_df_with_modelo_1(df, modelo_1_df)['CPF']
             df.to_excel('rech.xlsx')
