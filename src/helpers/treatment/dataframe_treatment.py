@@ -41,7 +41,6 @@ class DataframeTreatment:
         default_column_names: list[str] = c_names_dict.keys()
         columns_to_be_treated: list[str] = DT.DEFAULT_TREATEMENTS.keys()
 
-
         df_to_return = DT.rename_columns_names(df_to_return, client_name)
         df_to_return = DT.change_column_types(df_to_return)
 
@@ -115,29 +114,32 @@ class DataframeTreatment:
     def rename_columns_names(df: DataFrame, client_name: str) -> DataFrame:
 
         DT: Type[DataframeTreatment] = DataframeTreatment
-        df_to_return: DataFrame = df
+        df_to_return: DataFrame = df.copy()  # evita efeitos colaterais
 
         df_columns: list[str] = df_to_return.columns.to_list()
         c_names_dict: dict = DT.DEFAULT_COLUMNS_NAMES
 
         for default_c_name in c_names_dict:
+            if default_c_name == 'data_lancamento':
+                continue
 
-            # IF existe pq key data_lancamento esta como nome, ele serve pra add
-            # posteriormente no bloco for abaixo e manter o padrao de dicionarios
-            if default_c_name != 'data_lancamento':
+            unpatterned_c_name: str = c_names_dict[default_c_name][client_name]
 
-                # Acessa o dicionario dos nomes de colunas padrão
-                unpatterned_c_name: str = c_names_dict[default_c_name][client_name]
-
-                # Renomeio das colunas para os nomes padrões; se '=' nao precisa renomear
-                if unpatterned_c_name in df_columns and unpatterned_c_name != '=':
-                    df_to_return.rename(columns={unpatterned_c_name: default_c_name}, inplace=True)
-                elif unpatterned_c_name == '=':
-                    pass
-                else:
+            if unpatterned_c_name == '=':
+                # apenas garante que a coluna exista
+                if default_c_name not in df_to_return.columns:
                     df_to_return[default_c_name] = np.nan
-             
+                    
+            elif unpatterned_c_name in df_to_return.columns:
+                df_to_return[default_c_name] = df_to_return.pop(unpatterned_c_name)
+                
+            else:
+                # se não existir no DF e não for '=', cria coluna
+                if default_c_name not in df_to_return.columns:
+                    df_to_return[default_c_name] = np.nan
+                    
         return df_to_return
+
     
 
     @staticmethod
