@@ -73,7 +73,6 @@ class MakeSocRequests:
         )
         
         df = self.merge_funcs_infos(df=df)
-        print(df)
         
         return df
 
@@ -195,6 +194,7 @@ class MakeSocRequests:
                 nomes[cpf] = func_df.loc[0, 'nomeFuncionario']
 
         df['nomeFuncionario'] = df['cpfFuncionario'].map(nomes)
+        print(df)
                 
         return df
         
@@ -267,6 +267,8 @@ class MakeSocRequests:
         
         res = req.post(url=url, data=xml, headers=headers)
         df = pd.read_xml(res.content,  xpath=".//Afastamento")
+        print(df)
+        
         
         return df
     
