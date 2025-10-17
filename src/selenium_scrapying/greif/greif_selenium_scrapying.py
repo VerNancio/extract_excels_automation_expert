@@ -112,10 +112,11 @@ class GreifSeleniumScrapying:
         self.driver.execute_script("arguments[0].scrollIntoView(true);", first_menu_clickable)
         first_menu_clickable.click()
         sleep(2)
-
+        
         second_menu_clickable = self.driver.find_element(By.CSS_SELECTOR,  '.nav-item.Suporte.RH.webAPP .sub-menu li')
         second_menu_clickable.click()
         sleep(1)
+        
 
 
     def add_filters(self, date_to_filter: str | None) -> bool:
@@ -127,8 +128,8 @@ class GreifSeleniumScrapying:
 
         wait = WebDriverWait(self.driver, 15)
 
-        sleep(2)
         wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "iframe_menu_administrador")))
+        sleep(2)
 
         status_filters_tab = self.driver.find_element(By.ID, 'id_tab_status_link')
         all_status_filters_elemnt: list[WebElement] = status_filters_tab.find_elements(By.CLASS_NAME, 'scGridRefinedSearchCampo')
