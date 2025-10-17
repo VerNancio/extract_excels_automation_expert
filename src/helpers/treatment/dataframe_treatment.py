@@ -135,7 +135,9 @@ class DataframeTreatment:
                 elif unpatterned_c_name == '=':
                     pass
                 else:
-                    df_to_return[default_c_name] = np.nan
+                    # só cria se ainda não existir
+                    if default_c_name not in df_to_return.columns:
+                        df_to_return[default_c_name] = np.nan
              
         return df_to_return
     
@@ -258,6 +260,7 @@ class DataframeTreatment:
             
         if column_name == 'cids':
             # Substitui valores NaN reais ou string "nan" por string vazia
+            print(df['cids'])
             df.loc[df['cids'].isna() | (df['cids'].astype(str).str.lower() == "nan"), 'cids'] = ""
 
             # Exemplo extra: se quiser normalizar "s/c" também

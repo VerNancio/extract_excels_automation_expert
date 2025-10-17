@@ -164,6 +164,7 @@ class StoreSheets:
 
         file_path = os.path.join(dir_path, filename)
         df.to_excel(file_path, index=False)
+        ""
 
         print(f'{date_to_save}: {df.shape[0]} registros salvos no diretório do Onedrive...')
 

@@ -74,7 +74,7 @@ class MakeSocRequests:
         
         df = self.merge_funcs_infos(df=df)
         print('1111111111111111111')
-        print(df)
+        print(df.columns)
         
         return df
 
