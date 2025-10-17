@@ -87,15 +87,12 @@ def main(**kwargs):
     df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
     
     try: 
-<<<<<<< HEAD
 
         if client_name in ['copa']:
             folder_name = 'copaenergia'
         else:
             folder_name = client_name
 
-=======
->>>>>>> f3edd9d911fd63f03d2c19b08f0a9c06980907bd
         date_to_save: str = kwargs.get('date_to_filter', date_formatter.today())
 
         storager = StoreSheets()
