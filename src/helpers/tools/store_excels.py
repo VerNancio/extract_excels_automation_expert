@@ -15,6 +15,7 @@ class StoreSheets:
         self,
         df: DataFrame, 
         client_name: str, 
+        folder_name: str,
         date: str = None, 
         date_in_name: bool = False, 
         report_type: str = None,
@@ -35,15 +36,18 @@ class StoreSheets:
         match (should_store_where):
             case 'onedrive':
                 StoreSheets.store_in_onedrive(df=df, client_name=client_name,
+                                        folder_name=folder_name,
                                         date=date, date_in_name=date_in_name, 
                                         report_type=report_type)
 
             case 'local':
                 StoreSheets.store_in_local_dir(df=df, client_name=client_name,
+                                        folder_name=folder_name,
                                         date=date, date_in_name=date_in_name, 
                                         report_type=report_type)
             case 'both':
                 StoreSheets.store_in_both(df=df, client_name=client_name,
+                                        folder_name=folder_name,
                                         date=date, date_in_name=date_in_name, 
                                         report_type=report_type)
 
@@ -54,6 +58,7 @@ class StoreSheets:
     def store_in_both(
         df: DataFrame, 
         client_name: str, 
+        folder_name: str,
         date: str = None, 
         date_in_name: bool = False, 
         ) -> None:
@@ -69,10 +74,12 @@ class StoreSheets:
         """
 
         StoreSheets.store_in_onedrive(df=df, client_name=client_name,
+                                      folder_name=folder_name,
                                       date=date, date_in_name=date_in_name, 
                                      )
         
         StoreSheets.store_in_onedrive(df=df, client_name=client_name,
+                                      folder_name=folder_name,
                                       date=date, date_in_name=date_in_name, 
                                      )
 
@@ -81,6 +88,7 @@ class StoreSheets:
     def store_in_local_dir(
         df: DataFrame, 
         client_name: str, 
+        folder_name: str,
         date: str = None, 
         date_in_name: bool = False, 
         report_type: str = None
@@ -115,6 +123,7 @@ class StoreSheets:
     def store_in_onedrive(
         df: DataFrame, 
         client_name: str, 
+        folder_name: str,
         date: str = None, 
         date_in_name: bool = False, 
         report_type: str = None
@@ -137,9 +146,17 @@ class StoreSheets:
         else:
             date_to_save = DateFormatter(default_format='iso').today()
 
-        onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
-        dir_path = os.path.join(onedrive_path, 'SmartReports', client_name.lower())
+        
+        # onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
+        # onedrive_path = os.path.join(os.environ['USERPROFILE'], '\EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA\Expert Ocupacional Externo - SmartReports\Bimbo\Extração Automatizada')
+
+        # dir_path = os.path.join(onedrive_path, 'SmartReports', client_name.lower())
+        # filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
+
+        sharepoint_path = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
+        dir_path = os.path.join(sharepoint_path, folder_name, 'Extração Automatizada')
         filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
+
 
         file_path = os.path.join(dir_path, filename)
         df.to_excel(file_path, index=False)

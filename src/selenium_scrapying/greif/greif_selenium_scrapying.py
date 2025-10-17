@@ -46,12 +46,13 @@ class GreifSeleniumScrapying:
         )
         
         self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver.maximize_window()
         self.credentials = get_credentials('greif')
 
 
     def run(self, date_to_filter: str | None) -> DataFrame | None:
 
-        # try:
+        try:
             self.do_login()
             self.go_to_menu()
 
@@ -72,10 +73,10 @@ class GreifSeleniumScrapying:
 
             return df
 
-        # except Exception as e:
+        except Exception as e:
             print(f"Ocorreu um erro: {e}")
 
-        # finally:
+        finally:
             self.driver.quit()
             print("Navegador fechado.")
 
@@ -106,7 +107,9 @@ class GreifSeleniumScrapying:
 
     def go_to_menu(self) -> None:
 
-        first_menu_clickable = self.driver.find_element(By.CSS_SELECTOR, '.nav-item.Suporte.RH.webAPP')
+        first_menu_clickable = self.driver.find_element(By.CSS_SELECTOR, '.nav-item.Suporte.RH.webAPP') \
+                                          .find_element(By.TAG_NAME, 'a')
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", first_menu_clickable)
         first_menu_clickable.click()
         sleep(2)
 

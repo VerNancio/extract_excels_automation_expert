@@ -46,7 +46,8 @@ def main(**kwargs):
     if date_formatter.to_datetime(start_date) > date_formatter.to_datetime(end_date):
         raise ValueError("Data de início de busca maior que a final")
         
-        
+
+    print(f'Iniciando extração dos dados do client: {client_name.capitalize()}\n')    
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         df: DataFrame = scraper.run()
@@ -89,6 +90,11 @@ def main(**kwargs):
     
     try: 
 
+        if client_name in ['copa']:
+            folder_name = 'copaenergia'
+        else:
+            folder_name = client_name
+
         date_to_save: str = kwargs.get('date_to_filter', date_formatter.today())
 
         storager = StoreSheets()
@@ -96,6 +102,7 @@ def main(**kwargs):
         storager.storage_data(
             df=df_treated, 
             client_name=client_name,
+            folder_name=folder_name,
             date=date_to_save, 
             date_in_name=save_with_date_in_name, 
             report_type=report_type,
