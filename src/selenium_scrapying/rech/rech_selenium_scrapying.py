@@ -34,7 +34,7 @@ class RechSeleniumScrapying:
         
     def run(self) -> DataFrame | None:
 
-        # try:
+        try:
             self.do_login()
             self.go_to_menu()
 
@@ -50,10 +50,10 @@ class RechSeleniumScrapying:
 
             return df
 
-        # except Exception as e:
+        except Exception as e:
             print(f"Ocorreu um erro: {e}")
 
-        # finally:
+        finally:
             self.driver.quit()
             print("Navegador fechado.")
 

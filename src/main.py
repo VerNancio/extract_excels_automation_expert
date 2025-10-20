@@ -72,10 +72,6 @@ def main(**kwargs):
     elif client_name in ['leroy', 'pluri', 'viva']:
         requester = MakeSocRequests(client_name=client_name)
         df = requester.run(start_date=start_date, end_date=end_date)
-        # print(df)
-        df.to_excel('./pluri.xlsx')
-        # print('\n\n\n\n')
-        # print(df['afastamentoHoras'])
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
@@ -87,16 +83,17 @@ def main(**kwargs):
     
     try: 
 
-        if client_name in ['copa']:
-            folder_name = 'copaenergia'
-        else:
-            folder_name = client_name
+        match client_name:
+            case 'copa':
+                folder_name = 'copaenergia'
+            case 'pluri':
+                folder_name = 'PLuriViva'
+            case _:
+                folder_name = client_name
 
         date_to_save: str = kwargs.get('date_to_filter', date_formatter.today())
 
         storager = StoreSheets()
-
-        folder_name = client_name
         storager.storage_data(
             df=df_treated, 
             client_name=client_name,
@@ -107,7 +104,6 @@ def main(**kwargs):
             should_store_where=should_store_where
         )
 
-            
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')
     

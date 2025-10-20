@@ -50,9 +50,6 @@ class MakeSocRequests:
             DataFrame: _retorna o dataframe com todos os dados dos atestados captados_
         """
         
-        # self.build_func_name_request_xml()
-        # return
-        
         date_formatter = DateFormatter()
         start_search_date = date_formatter.months_ago(12)
         end_search_date = date_formatter.months_ahead(12)
@@ -64,7 +61,7 @@ class MakeSocRequests:
         
         request_xml = self.build_request_xml(start_date=start_search_date, end_date=end_search_date)
         df: DataFrame = self.request_data(xml=request_xml)
-        
+
         df = CompareDateFilter.is_beetween(
             df,
             column_name='dataFicha',
@@ -73,7 +70,6 @@ class MakeSocRequests:
         )
         
         df = self.merge_funcs_infos(df=df)
-        
         return df
 
 
@@ -199,64 +195,6 @@ class MakeSocRequests:
         return df
         
         
-
-    
-    # def build_func_name_request_xml(self, cpf: str = None) -> str:
-        
-    #     # Nonce
-    #     nonce_raw = os.urandom(16)
-    #     nonce_b64 = base64.b64encode(nonce_raw).decode('utf-8')
-
-    #     # Timestamps UTC
-    #     # brasilia = ZoneInfo("America/Sao_Paulo")
-    #     now = datetime.datetime.utcnow().replace(microsecond=0)
-
-    #     # now = datetime.datetime.utcnow().replace(microsecond=0)
-    #     created = now.strftime('%Y-%m-%dT%H:%M:%SZ')
-    #     expires = (now + datetime.timedelta(seconds=self.expires_in_seconds)).strftime('%Y-%m-%dT%H:%M:%SZ')
-
-    #     # PasswordDigest = SHA1(nonce + created + password)
-    #     digest_input = nonce_raw + created.encode('utf-8') + self.credentials['pw'].encode('utf-8')
-    #     password_digest = base64.b64encode(hashlib.sha1(digest_input).digest()).decode('utf-8')
-
-    #     # Monta XML
-    #     xml = f"""
-    #     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-    #             xmlns:ser="http://services.soc.age.com/">
-    #         <soapenv:Header>
-    #             <wsse:Security soapenv:mustUnderstand="1" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-    #                                         xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-    #                 <wsu:Timestamp wsu:Id="TS-{(uuid.uuid4().hex).upper()}">
-    #                     <wsu:Created>{created}</wsu:Created>
-    #                     <wsu:Expires>{expires}</wsu:Expires>
-    #                 </wsu:Timestamp>
-    #                 <wsse:UsernameToken wsu:Id="UsernameToken-{(uuid.uuid4().hex).upper()}">
-    #                     <wsse:Username>U{self.credentials['user_code']}</wsse:Username>
-    #                     <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordDigest">{password_digest}</wsse:Password>
-    #                     <wsse:Nonce EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary">{nonce_b64}</wsse:Nonce>
-    #                     <wsu:Created>{created}</wsu:Created>
-    #                 </wsse:UsernameToken>
-    #             </wsse:Security>
-    #         </soapenv:Header>
-    #         <soapenv:Body>
-    #             <ser:importacaoFuncionario>
-    #                 <Funcionario>
-    #                     <funcionarioWsVo>
-    #                         <chaveProcuraFuncionario>CPF_ATIVO</chaveProcuraFuncionario>
-    #                         <situacao>ATIVO</situacao>
-    #                         <cpf>13665903688</cpf>
-    #                     </funcionarioWsVo>
-    #                     <tipoAfastamento>TODOS</tipoAfastamento>
-    #                 </Funcionario>
-    #             </ser:importacaoFuncionario>
-    #         </soapenv:Body>
-    #     </soapenv:Envelope>
-    #     """
-    #     print(xml)
-    #     return
-    #     return xml
-    
-
     def request_data(self, xml: str) -> DataFrame:
         
         url = "https://ws1.soc.com.br/WSSoc/services/LicencaMedicaWs"
@@ -268,7 +206,6 @@ class MakeSocRequests:
         res = req.post(url=url, data=xml, headers=headers)
         df = pd.read_xml(res.content,  xpath=".//Afastamento")
         print(df)
-        
         
         return df
     
