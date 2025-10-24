@@ -124,20 +124,13 @@ class RechSeleniumScrapying:
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.ui-g-12.ng-star-inserted')
         # spans: list[WebElement] = self.driver.find_elements(By.CSS_SELECTOR, '.count.ng-star-inserted')
         
-        # [print(span.get_attribute('outerHTML')) for span in pendent_quick_selector]
-
-        # Span da quantidade de pendentes
-        # pending_num_span: WebElement = spans[0]
         try:
+            # Span da quantidade de pendentes
             pending_num_span: WebElement =  pendent_quick_selector.find_element(By.CSS_SELECTOR, '.count.ng-star-inserted')
             pending_num = int(pending_num_span.text)
         except NoSuchElementException:
             pending_num = 0
             
-        # pending_num = int(pending_num_span.text) if pending_num_span else 0
-        # print(pending_num_span.get_attribute('outerHTML'))
-        # pending_num: int = int(pending_num_span.text)
-
         self.driver.switch_to.default_content()
 
         return pending_num
@@ -197,9 +190,6 @@ class RechSeleniumScrapying:
         wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "custom_iframe")))
 
 
-        # Range deveria ser setado com base no numero de afastamentos, 
-        # mas nao consegui captar ele de maneira fácil 
-
         last_items_in_box_qnt = 0
         while last_items_in_box_qnt != (pending_num + 1): 
 
@@ -213,23 +203,13 @@ class RechSeleniumScrapying:
                                                                         .find_element(By.TAG_NAME, 'div') \
                                                                         .find_elements(By.XPATH, "./*")
                 
-                # sleep(2)
-                # data_box: WebElement = wait.until(EC.visibility_of_element_located((By.ID, 'ui-accordiontab-0-content')))
-                # data_box_items: list[WebElement] = data_box.find_element(By.TAG_NAME, 'div') \
-                #                                            .find_elements(By.XPATH, "./*")
-                # sleep(0.4)
-
                 class_str = data_box_items[-2].get_attribute('class')
                 class_list = class_str.split()
 
                 if 'see-more' in class_list:
                     data_box_items[-2].click()
 
-                # elif last_items_in_box_qnt == len(data_box_items):
-                #     break
-
                 last_items_in_box_qnt = len(data_box_items)
-                # print(last_items_in_box_qnt, ' - ', pending_num)
 
             except NoSuchElementException as e:
                 raise e
@@ -268,11 +248,6 @@ class RechSeleniumScrapying:
             items_dicted = dict(items_splited)
 
             people_list.append(items_dicted)        
-
-
-        # for index, person in enumerate(people_list):
-        #     print('Fazendo o ticket de index:', index)
-        #     self.reply_ticket(person['ticket_id'])
 
         return people_list
     
@@ -358,10 +333,6 @@ class RechSeleniumScrapying:
         modelo_1_df.set_index('Nome Funcionário')
         
         df_filled = df.combine_first(modelo_1_df).reset_index()
-        # merged_df = pd.merge(df, modelo_1_df, left_on='Colaborador', right_on='Nome Funcionário', how='')
-        
-        print(df_filled.columns.to_list())
-        print(df_filled[['CPF', 'Colaborador']])
         
         return df_filled
         

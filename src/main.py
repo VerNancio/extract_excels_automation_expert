@@ -24,7 +24,7 @@ from .requesters.make_requests.MakeSocRequests import MakeSocRequests
 from .selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapying
 from .selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
 from .selenium_scrapying.merck.merck_selenium_scrapying import MerckSeleniumScrapying
-
+from .selenium_scrapying.soc.soc_selenium_scrapying import SocSeleniumScrapying
 
 
 def main(**kwargs):
@@ -70,8 +70,8 @@ def main(**kwargs):
         df = requester.run(row_post_date=date_to_filter)
 
     elif client_name in ['leroy', 'pluri', 'viva']:
-        requester = MakeSocRequests(client_name=client_name)
-        df = requester.run(start_date=start_date, end_date=end_date)
+        scraper = SocSeleniumScrapying(client_name=client_name)
+        df: DataFrame = scraper.run(start_date=start_date, end_date=end_date)
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
@@ -103,7 +103,7 @@ def main(**kwargs):
             report_type=report_type,
             should_store_where=should_store_where
         )
-
+            
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')
     
