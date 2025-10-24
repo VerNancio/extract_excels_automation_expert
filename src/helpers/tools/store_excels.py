@@ -39,7 +39,6 @@ class StoreSheets:
                                         folder_name=folder_name,
                                         date=date, date_in_name=date_in_name, 
                                         report_type=report_type)
-
             case 'local':
                 StoreSheets.store_in_local_dir(df=df, client_name=client_name,
                                         folder_name=folder_name,
@@ -113,7 +112,7 @@ class StoreSheets:
             
 
         filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
-        file_path = os.path.join('data', client_name, filename)
+        file_path = os.path.join('data', folder_name, filename)
                     
         df.to_excel(file_path, index=False)
 
@@ -146,7 +145,7 @@ class StoreSheets:
             date_to_save = date_formatter.format_date(date, current_format='dmy', new_format='iso')
         else:
             date_to_save = DateFormatter(default_format='iso').today()
-        # C:\Users\Expert149\EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA\Expert Ocupacional Externo - SmartReports\Bimbo\Extração Automatizada
+
         # onedrive_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA')
         # filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
 
@@ -161,10 +160,8 @@ class StoreSheets:
 
         filename = f'ATESTADOS_{client_name.upper()}_{f'HORAS_' if report_type == 'hour' else ''}{date_to_save}.xlsx'
 
-
         file_path = os.path.join(dir_path, filename)
         df.to_excel(file_path, index=False)
-        ""
 
         print(f'{date_to_save}: {df.shape[0]} registros salvos no diretório do Onedrive...')
 
