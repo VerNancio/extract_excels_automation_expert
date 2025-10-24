@@ -86,8 +86,10 @@ class DataframeTreatment:
                 df_to_return = DT.add_return_date_column(df_to_return)
             
             if default_c_name == 'tipo':
-                # Acrescenta 'afastamento e declaração de horas' a todas a colunas do tipo
-                df_to_return['tipo'] = 'afastamento e declaração de horas'
+                
+                if df_to_return['tipo'].empty:
+                    # Acrescenta 'afastamento e declaração de horas' a todas a colunas do tipo
+                    df_to_return['tipo'] = ''
 
             # if default_c_name in columns_to_change_type:
             #     # Muda o tipo da coluna
@@ -194,7 +196,8 @@ class DataframeTreatment:
             axis=1
         )
         
-        print(df[['data_inicio', 'dias_afastamento','data_retorno']])
+        # Se ainda não tiver data de retorno definida, valor padrão
+        df.loc[pd.isnull(df['data_retorno']), 'data_retorno'] = date_without_value
 
         return df
     
@@ -303,7 +306,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'cidESocial', 'pluri': 'cidESocial '
+            'leroy': 'CIDs Adicionais', 'pluri': 'CIDs Adicionais'
         },
         'cids_descricao': {
             'workon': None,
@@ -313,7 +316,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'DESCRICAO_CID_ADICIONAL', 'pluri': 'DESCRICAO_CID'
+            'leroy': 'Descrição do Cid Adicional', 'pluri': 'Descrição do Cid Adicional'
         },
         'cpf': {
             'workon': 'CPF',
@@ -323,7 +326,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'cpfFuncionario', 'pluri': 'cpfFuncionario'
+            'leroy': 'CPF', 'pluri': 'CPF'
         },
         'nome_funcionario': {
             'workon': 'Nome',
@@ -333,7 +336,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'nomeFuncionario', 'pluri': 'nomeFuncionario'
+            'leroy': 'Funcionário', 'pluri': 'Funcionário'
         },
         'matricula': {
             'workon': 'Matricula RH',
@@ -343,7 +346,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'matriculaFuncionario', 'pluri': 'matriculaFuncionario'
+            'leroy': 'Matrícula', 'pluri': 'Matrícula'
         },
         'dias_afastamento': {
             'workon': None,
@@ -353,7 +356,7 @@ class DataframeTreatment:
             'coop': None,
             'bimbo': None,
             'copa': None,
-            'leroy': None, 'pluri': None
+            'leroy': 'Dias Afastados', 'pluri': 'Dias Afastados'
         },
         'data_inicio': {
             'workon': 'Inicio',
@@ -363,7 +366,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'dataInicioAfastamento', 'pluri': 'dataInicioAfastamento'
+            'leroy': 'Início', 'pluri': 'Início'
         },
         'data_retorno': {
             'workon': 'Termino',
@@ -373,15 +376,18 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'dataFimAfastamento', 'pluri': 'dataFimAfastamento'
+            'leroy': 'Fim', 'pluri': 'Fim'
         },
-        # 'data_lancamento': {
-        #     'coop': '=',
-        #     'bimbo': '=',
-        #     'copa': '=',
-        #     'leroy': 'DT_CRIACAO', 
-        #     'pluri': 'DT_CRIACAO',
-        # },
+        'data_lancamento': {
+            'workon': None,
+            'greif': None,
+            'merck': None, 
+            'rech': None, 
+            'coop': None,
+            'bimbo': None,
+            'copa': None,
+            'leroy': None, 'pluri': None
+        },
         'hora_inicio': {
             'workon': None,
             'greif': '=',
@@ -390,7 +396,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'HORA_INICIO_ATESTADO', 'pluri': 'HORA_INICIO_ATESTADO'
+            'leroy': 'Hora Inicial', 'pluri': 'Hora Inicial'
         },
         'hora_fim': {
             'workon': None,
@@ -400,7 +406,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'HORA_FIM_ATESTADO', 'pluri': 'HORA_FIM_ATESTADO'
+            'leroy': 'Hora Final', 'pluri': 'Hora Final'
         },
         'nome_prestador': {
             'workon': 'Medico_Nome',
@@ -410,7 +416,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': None, 'pluri': None
+            'leroy': 'Médico Solicitante', 'pluri': 'Médico Solicitante'
         },
         'identificador_prestador': {
             'workon': 'Medico_Numero',
@@ -420,7 +426,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'codigoMedico', 'pluri': 'codigoMedico'
+            'leroy': 'Conselho de Classe', 'pluri': 'Conselho de Classe'
         },
         'estado_prestador': {
             'workon': None,
@@ -430,7 +436,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'ufConselhoClasse', 'pluri': 'ufConselhoClasse'
+            'leroy': 'UF', 'pluri': 'UF'
         },
         'local': {
             'workon': 'LOCAL DE EMISSÃO',
@@ -440,7 +446,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': None, 'pluri': None
+            'leroy': 'Unidade', 'pluri': 'Unidade'
         },
         'tipo': {
             'workon': None,
@@ -450,7 +456,7 @@ class DataframeTreatment:
             'coop': '=',
             'bimbo': '=',
             'copa': '=',
-            'leroy': 'descricaoMotivo', 'pluri': 'descricaoMotivo'
+            'leroy': 'Tipo Licença', 'pluri': 'Tipo Licença'
         },
         'codigo_tipo': {
             'workon': None,

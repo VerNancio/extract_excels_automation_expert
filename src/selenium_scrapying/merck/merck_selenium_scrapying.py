@@ -50,7 +50,7 @@ class MerckSeleniumScrapying:
             df: DataFrame = self.get_all_reports_in_df(start_date, end_date)
 
             df = self.pre_treat_df(df)
-
+            df.to_excel('merck.xlsx')
             return df
 
         except Exception as e:
