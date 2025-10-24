@@ -205,18 +205,19 @@ class SocSeleniumScrapying:
         consult_process_bttn.click()
         sleep(4)
         
-        
         relatory_row: WebElement = self.driver.find_element(By.XPATH, f'//tr[@data-codigo="{relatory_process_code}"]')
         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", relatory_row)
-        relatory_link: WebElement = relatory_row.find_element(By.XPATH, '//td[@class="center-align"]')
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, '//td[@class="center-align"]'))
-        )
-        sleep(20)
+        sleep(60)
+        
+        # relatory_link: WebElement = relatory_row.find_element(By.XPATH, '//td[@class="center-align"]')
+        # WebDriverWait(self.driver, 10).until(
+        #     EC.visibility_of_element_located((By.XPATH, '//td[@class="center-align"]'))
+        # )
         
         relatory_process_status_elmnt: WebElement = relatory_row.find_element(By.CLASS_NAME, 'situacao')
         download_clickable = relatory_process_status_elmnt.find_element(By.XPATH, '//a[@data-programa-download="pr043"]')
         self.driver.execute_script("arguments[0].click();", download_clickable)
+        
         # sleep(10)
         # location = download_clickable.location
         # size = download_clickable.size

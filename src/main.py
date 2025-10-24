@@ -19,7 +19,6 @@ from .helpers.tools.store_excels import StoreSheets
 
 from .requesters.make_requests.MakeCloseRequests import MakeCloseRequests
 from .requesters.make_requests.MakeJestorRequests import MakeJestorRequests
-from .requesters.make_requests.MakeSocRequests import MakeSocRequests
 
 from .selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapying
 from .selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
@@ -91,7 +90,7 @@ def main(**kwargs):
             case _:
                 folder_name = client_name
 
-        date_to_save: str = kwargs.get('date_to_filter', date_formatter.today())
+        date_to_save: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
 
         storager = StoreSheets()
         storager.storage_data(

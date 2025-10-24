@@ -55,13 +55,12 @@ class DataframeTreatment:
             # c_name_value: str | None = c_names_dict[default_c_name][client_name] if default_c_name is not None else None
             c_name_value: str | None = c_names_dict[default_c_name][client_name]
 
-            # Se a coluna deve ser tratada e o c_name_value é diferente de nulo,
+            # Se a coluna deve ser tratada e o c_name_value é diferente de nulo, 
             # ou seja, ela existe, executa o tratamento de coluna
             if default_c_name in columns_to_be_treated:
                 if c_name_value is None:
                     df_to_return[default_c_name] = ''
                 else:
-                    # Trata os dados
                     df_to_return[default_c_name] = DT.apply_treatments_column(df_to_return, default_c_name)
 
             if default_c_name == 'data_lancamento':
@@ -69,9 +68,6 @@ class DataframeTreatment:
                 # df_to_return = DT.add_current_date_column(df_to_return)
                 df_to_return['data_lancamento'] = dt.date.today().strftime('%d/%m/%Y') 
                 continue
-
-            # Trata especificamente por tipo; ex: retira os caracteres especiais de textos
-            # df_to_return[default_c_name] = DT.treat_by_type(df_to_return[default_c_name])
 
             # Capaz que tenha que mudar o if abaixo pra elif e add um if antes 
             # pra saber se a data de retorno já existe
@@ -91,12 +87,6 @@ class DataframeTreatment:
                     # Acrescenta 'afastamento e declaração de horas' a todas a colunas do tipo
                     df_to_return['tipo'] = ''
 
-            # if default_c_name in columns_to_change_type:
-            #     # Muda o tipo da coluna
-            #     df_to_return[default_c_name] = DT.change_column_type(df_to_return, default_c_name)
-
-
-        # df_to_return = DT.drop_nulls(df_to_return).copy()
 
         # Temporario -- tentativa de salvar o datetime com a data somente
         df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
@@ -137,6 +127,8 @@ class DataframeTreatment:
                 # se não existir no DF e não for '=', cria coluna
                 if default_c_name not in df_to_return.columns:
                     df_to_return[default_c_name] = np.nan
+                    
+        df_to_return
                     
         return df_to_return
                     
@@ -264,8 +256,7 @@ class DataframeTreatment:
     NECESSARY_MODEL_COLUMNS: list[str] = ['cpf', 'data_inicio', 'data_fim', 'data_lancamento', 'nome_funcionario']
     ALL_MODEL_COLUMNS: list[str] = [
                                     'cids', 'cids_descricao', 'cpf', 'data_retorno', 
-                                    # 'data_inicio', 'data_lancamento', 'estado_prestador', 
-                                    'data_inicio', 'estado_prestador', 
+                                    'data_inicio', 'data_lancamento', 'estado_prestador', 
                                     'hora_fim', 'hora_inicio', 'identificador_prestador', 
                                     'local', 'nome_funcionario', 'nome_prestador', 'tipo', 
                                     'codigo_tipo', 'tipo_prestador', 'matricula'

@@ -49,8 +49,6 @@ if __name__ == '__main__':
         if 'client_name' not in kwargs_from_cmd:
             raise Exception('Kwarg obrigatório "client_name" não foi enviado ou está com escrita incorreta.')
             
-        
-            
         main(**kwargs_from_cmd)
         
     end_time = time.time()
