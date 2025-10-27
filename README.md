@@ -48,8 +48,8 @@ extracao_planilhas_afastados/
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/seuusuario/seuprojeto.git
-   cd seuprojeto
+   git clone https://github.com/VerNancio/extract_excels_automation_expert.git
+   cd extract_excels_automation_expert
    ```
 
 2. **Crie e ative o ambiente virtual:**
@@ -78,7 +78,3 @@ As principais dependências usadas e suas utilidades:
     - Selenium (operacionalizar por meio de bots web a coleta dos dados)
     - Requests (fazer a requisição de dados de forma direta via HTTP)
     - Numpy (usado em alguns poucos contextos em conjunto com o Pandas)
-
-## 📜 Licença
-
-Adicione aqui a licença (ex: MIT, Apache 2.0, etc.)
