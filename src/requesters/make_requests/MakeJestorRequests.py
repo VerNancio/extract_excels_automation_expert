@@ -4,7 +4,7 @@ import io
 import shutil
 import datetime as dt
 
-import pandas as pd; from pandas import DataFrame
+import pandas as pd; from pandas import DataFrame, Series
 import requests as req; from requests import Response
 import json
 
@@ -27,8 +27,8 @@ class MakeJestorRequests:
 
     def __init__(self, client_name: str):
 
-        if client_name not in ['workon', 'sulnorte', 'ofy', 'rip']:
-            raise ValueError('Parâmetro "client_name" não informado corretamente')
+        # if client_name not in ['workon', 'sulnorte', 'ofy', 'rip', 'fabitos']:
+            # raise ValueError('Parâmetro "client_name" não informado corretamente')
         
         self.client_name = client_name
             
@@ -51,28 +51,32 @@ class MakeJestorRequests:
         # print(f"Pasta de download temporária garantida em: {self.download_temp_dir_path}")
 
 
-    # @staticmethod
-    # def get_jestor_clients_names_listed(self) -> list[str]:
-    #     return ['workon', 'sulnorte', 'ofy', 'rip']
-
-
     def run(
             self,
             row_post_date: str = dt.date.today().strftime('%Y-%m-%d')
             # list_size: int = 300,
             ) -> DataFrame | None:
         
-        emails: dict[str, str] = {
-            'workon': 'afastamento@workongroup.com.br', 
-            'sulnorte': '', 
-            'ofy': '', 
-            'rip': ''
-        }
+        if self.client_name == 'fabitos':
+            df = self.fabitos_get_request()
+            if df is not None:
+                self.fabito_check_request(df['name'].copy().to_list())
+                # df.to_excel('a.xlsx')
+            else:
+                return None
+            
+        else:
+            emails: dict[str, str] = {
+                'workon': 'afastamento@workongroup.com.br', 
+                'sulnorte': '', 
+                'ofy': '', 
+                'rip': ''
+            }
+            
+            self.sender_email = emails[self.client_name]
+            self.row_post_date = row_post_date
         
-        self.sender_email = emails[self.client_name]
-        self.row_post_date = row_post_date
-
-        df = self.download_and_save_xlsx_file() 
+            df = self.download_and_save_xlsx_file() 
 
         return df
 
@@ -86,7 +90,89 @@ class MakeJestorRequests:
         os.makedirs(self.download_temp_dir_path, exist_ok=True)
 
         print(f"Pasta de download temporária garantida em: {self.download_temp_dir_path}")
+        
+    
+    def fabitos_get_request(self) -> DataFrame | None:
+        """_Recolhe da tabela dos atestados da Fabitos todos os registros \
+            aprovados e que não foram coletados ainda_
 
+        Returns:
+            DataFrame | None: _Dataframe com todos os registros da tabela necessários_
+        """
+        
+        last_path = 'list'
+        URL = f"https://expertocupacional.api.jestor.com/object/{last_path}"
+
+        payload = {
+            "object_type":"e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik",
+            "size": self.list_size,
+            "nested_type":"onlyrefs",
+            "filters": {
+                "filters": [
+                    {"field":"fase","type":"list","operator":"in","value":"Aprovado"},
+                    {"field":"ja_feita_a_coleta","type":"boolean","value":"0"}
+                ]
+            },
+            "size": 300,
+            "token":"cc0da72ab3741491dec8f2daf2a95bba"
+        }
+
+
+        res: Response = req.post(URL, headers=self.HEADERS, json=payload)
+        
+        # Se houver algum erro na requisição
+        if res.status_code != 200:
+            print(f"\nErro na requisição: {res.status_code}")
+            return res.text
+        
+        res_json: dict = res.json()
+        data = res_json['data']
+
+        all_rows: list[dict] = data['items']
+        df: DataFrame = pd.json_normalize(all_rows)
+        print(df)
+        
+        if df.empty:
+            return None
+
+        return df
+        
+        
+    def fabito_check_request(self, ids_list: list[str]) -> None:
+        """_Atualiza os registros que foram coletados no Jestor pra constarem como tal_
+
+        Args:
+            ids (Series[str]): _ids dos registros coletados da tabela_
+        """
+        
+        
+        URL = 'https://expertocupacional.api.jestor.com/object/update'
+
+        print(f'Número total de registros que foram coletados e que vão ser sinalizados como tal: {len(ids_list)}\n')
+        
+        for i, id in enumerate(ids_list):
+            print('id: ', id)
+            
+            
+            AUTH_TOKEN = 'MTkxNDdmOTMzMzE4MzY16d87e0a03cMTczODYzMTI3MTg3ZGI5'
+            HEADERS = {
+                    "Authorization": f"Bearer {AUTH_TOKEN}",
+                    "accept": "application/json",
+                    "content-type": "application/json"
+            }
+            PAYLOAD = {
+                "object_type": 'e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik',
+                "data": {
+                    f'id_e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik': id,
+                    'ja_feita_a_coleta': True
+                },
+            }
+
+            res = req.post(URL, headers=HEADERS, json=PAYLOAD)
+            res_json = res.json()
+        
+            print(f'Realizado update Nº{i + 1} do registro de ID {id}')
+            
 
     def decrypt_xlsx(self, file_pw: str, content: bytes | Any):
 
@@ -114,7 +200,6 @@ class MakeJestorRequests:
 
     def download_and_save_xlsx_file(self) -> DataFrame | None:
         
-        # last_path = 'list-deleted' if is_deleted else 'list'
         last_path = 'list'
         URL = f"https://expertocupacional.api.jestor.com/object/{last_path}"
 

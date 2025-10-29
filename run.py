@@ -18,7 +18,7 @@ if __name__ == '__main__':
     help_msg = "KWarg deve ser passado no formato para cada item desta forma: \n" \
                     "--client_name:<nome da empresa>\n" \
                     "--date_to_filter:<data pra filtrar: dd/mm/YYYY>\n" \
-                    "--date_to_save:<data pra salvar no nome do xlsx: dd/mm/YYYY>\n" \
+                    "--date_to_save:<hoje/ontem/ultimo_dia_util/ultimo_dia_ultimo_mes>\n" \
                     "--start_date:<data pra filtrar: dd/mm/YYYY>\n" \
                     "--end_date:<data pra filtrar: dd/mm/YYYY>\n" \
                     "--should_store_where:<local/onedrive/both>\n" \

@@ -1,5 +1,5 @@
 from ...constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
-
+from ..tools.date_formatter import DateFormatter
 
 class HandleKWargs:
 
@@ -37,12 +37,35 @@ class HandleKWargs:
 
         return report_type
     
+    
     def handle_save_with_date_in_name(self) -> bool:
-        # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a data_to_filter
+        # Nos casos em que se quiser salvar o arquivo buscando com uma data especifica correspondente a data_to_filter
         save_with_date_in_name = self.kwargs.get('save_with_date_in_name', 'false')
         if save_with_date_in_name not in ['true', 'false']:
             raise ValueError('KWarg do lugar onde o arquivo deve ser armazenado não possuí valor válido: "save_with_date_in_name"\n' \
                             'Necessário passar como "true" ou "false", ou deixar como nulo (que tem valor padrão de "false")')
 
         return save_with_date_in_name
+    
+    
+    def handle_date_to_save(self) -> bool:
+        # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a date_to_save
+        date_to_save_kw = self.kwargs.get('date_to_save', 'ultimo_dia_util')
+        
+        date_to_save: str
+        date_formatter = DateFormatter()
+        match date_to_save_kw:
+            case 'hoje':
+                date_to_save = date_formatter.today()
+            case 'ontem':
+                date_to_save = date_formatter.yesterday()
+            case 'ultimo_dia_util':
+                date_to_save = date_formatter.last_working_day()
+            case 'ultimo_dia_ultimo_mes':
+                date_to_save = date_formatter.last_month_last_day()
+            case _:
+                raise ValueError('KWarg do lugar onde o arquivo deve ser armazenado não possuí valor válido: "date_to_save"\n' \
+                                'Necessário passar como "hoje", "ontem", "ultimo_dia_util" ou "ultimo_dia_ultimo_mes", ou deixar como nulo (que tem valor padrão de "ultimo_dia_util")')
+                
+        return date_to_save
         

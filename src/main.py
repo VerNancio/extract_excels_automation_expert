@@ -34,7 +34,7 @@ def main(**kwargs):
     should_store_where: str = handler.handle_non_existents_storage_places()
     report_type: str = handler.handle_non_existents_report_types()
     save_with_date_in_name: bool = handler.handle_non_existents_report_types()
-
+    date_to_save: str = handler.handle_date_to_save()
 
     date_formatter = DateFormatter()
     date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
@@ -64,7 +64,7 @@ def main(**kwargs):
     elif client_name in ['coop', 'copa', 'bimbo']:
         df: DataFrame = MakeCloseRequests.request_data(client_name=client_name, start_date=start_date, end_date=end_date)
 
-    elif client_name in ['workon', 'sulnorte', 'ofy', 'rip']:
+    elif client_name in ['workon', 'sulnorte', 'ofy', 'rip', 'fabitos']:
         requester = MakeJestorRequests(client_name=client_name)
         df = requester.run(row_post_date=date_to_filter)
 
@@ -89,8 +89,6 @@ def main(**kwargs):
                 folder_name = 'PLuriViva'
             case _:
                 folder_name = client_name
-
-        date_to_save: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
 
         storager = StoreSheets()
         storager.storage_data(

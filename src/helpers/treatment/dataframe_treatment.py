@@ -41,16 +41,17 @@ class DataframeTreatment:
         default_column_names: list[str] = c_names_dict.keys()
         columns_to_be_treated: list[str] = DT.DEFAULT_TREATEMENTS.keys()
 
+        print(df_to_return)
         df_to_return = DT.rename_columns_names(df_to_return, client_name)
         df_to_return = DT.change_column_types(df_to_return)
+        
 
         # Criação das colunas com dados vazios (pq a planilha básica não tem eles)
         renamed_columns: list[str] = df_to_return.columns.to_list()
 
-
         # Itera com os nomes padrões das colunas
         for default_c_name in default_column_names:
-
+            
             # Item da chave do dicionario correpondente
             # c_name_value: str | None = c_names_dict[default_c_name][client_name] if default_c_name is not None else None
             c_name_value: str | None = c_names_dict[default_c_name][client_name]
@@ -86,20 +87,18 @@ class DataframeTreatment:
                 if df_to_return['tipo'].empty:
                     # Acrescenta 'afastamento e declaração de horas' a todas a colunas do tipo
                     df_to_return['tipo'] = ''
-
-
+                    
         # Temporario -- tentativa de salvar o datetime com a data somente
-        df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
-        df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
+        # df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
+        # df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
         
-        df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
-        df_to_return['data_retorno'] = df_to_return['data_retorno'].dt.strftime('%d/%m/%Y')
+        # df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
+        # df_to_return['data_retorno'] = df_to_return['data_retorno'].dt.strftime('%d/%m/%Y')
 
-        df_to_return.loc[pd.isna(df_to_return['data_retorno']), 'data_retorno'] = dt.datetime(9999, 12, 31).strftime('%d/%m/%Y')
+        # df_to_return.loc[pd.isna(df_to_return['data_retorno']), 'data_retorno'] = dt.datetime(9999, 12, 31).strftime('%d/%m/%Y')
 
         return df_to_return[DT.ALL_MODEL_COLUMNS]
 
-    
 
     @staticmethod
     def rename_columns_names(df: DataFrame, client_name: str) -> DataFrame:
@@ -116,19 +115,13 @@ class DataframeTreatment:
 
             unpatterned_c_name: str = c_names_dict[default_c_name][client_name]
             if unpatterned_c_name == '=':
-                # apenas garante que a coluna exista
                 if default_c_name not in df_to_return.columns:
-                    df_to_return[default_c_name] = np.nan
-                    
+                    df_to_return[default_c_name] = ''
             elif unpatterned_c_name in df_to_return.columns:
                 df_to_return[default_c_name] = df_to_return.pop(unpatterned_c_name)
-                
             else:
-                # se não existir no DF e não for '=', cria coluna
                 if default_c_name not in df_to_return.columns:
-                    df_to_return[default_c_name] = np.nan
-                    
-        df_to_return
+                    df_to_return[default_c_name] = ''                    
                     
         return df_to_return
                     
@@ -173,7 +166,7 @@ class DataframeTreatment:
         df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce', dayfirst=True)
 
         # Data caso nao haja data de retorno
-        date_without_value = dt.datetime(9999, 12, 31)
+        date_without_value = dt.datetime(9999, 12, 31).strftime('%d-%m-%Y')
 
         # Se a coluna não existir ainda, cria com NaT
         if 'data_retorno' not in df.columns:
@@ -181,15 +174,22 @@ class DataframeTreatment:
 
         # Máscara apenas para linhas que precisam de cálculo
         mask = pd.notnull(df['dias_afastamento']) & pd.isnull(df['data_retorno'])
-
+        
         # Calcula a data de retorno apenas nessas linhas
         df.loc[mask, 'data_retorno'] = df.loc[mask].apply(
             lambda x: x['data_inicio'] + dt.timedelta(days=int(x['dias_afastamento'])),
             axis=1
         )
         
+        # Formatação de data
+        df['data_inicio'] = pd.to_datetime(df['data_inicio']).dt.strftime('%d-%m-%Y')
+        df['data_retorno'] = pd.to_datetime(df['data_retorno']).dt.strftime('%d-%m-%Y')
+        
         # Se ainda não tiver data de retorno definida, valor padrão
         df.loc[pd.isnull(df['data_retorno']), 'data_retorno'] = date_without_value
+        
+        # Se a não tiver data de inicio definida, valor padrão
+        df.loc[pd.isnull(df['data_inicio']), 'data_inicio'] = date_without_value
 
         return df
     
@@ -281,15 +281,21 @@ class DataframeTreatment:
         'cids_descricao': lambda desc: re.sub(r'[^a-zA-Z0-9\s]', '', str(desc)) if pd.notna(desc) else desc,
         'codigo_tipo': lambda tipo: re.sub(r'[^a-zA-Z0-9\s]', ' ', str(tipo)) if pd.notna(tipo) else tipo,
         'nome_funcionario': lambda name: str(name).lower()
-                                         if pd.notna(name) and str(name).strip() != 'nan'
+                                         if pd.notna(name) and str(name).strip().lower() not in ['nan', 'none', '']
                                          else '',
-        # 'nome_prestador': lambda name: name.upper() if type(name) == str else '',
-        # 'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if pd.notna(cpf) or pd.notnull(cpf) else '',
-        'cpf': lambda cpf: re.sub(r"[.-]", "", str(cpf)).zfill(11) if pd.notna(cpf) and cpf != 'nan' else '',
+        'hora_inicio': lambda hora: hora.strip('Hh ') if pd.notna(hora) else '',
+
+        'hora_fim': lambda hora: str(hora).strip('Hh ') if pd.notna(hora) else '',
+        'cpf': lambda cpf: (
+            re.sub(r"[.-]", "", str(cpf)).zfill(11)
+            if pd.notna(cpf) and str(cpf).strip().lower() not in ['nan', 'none', '']
+            else ''
+        ),
     }
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
         'cids': {
+            'fabitos': 'cid_1',
             'workon': 'CID10',
             'greif': 'Código(s) CID',
             'merck': '=',
@@ -300,6 +306,7 @@ class DataframeTreatment:
             'leroy': 'CIDs Adicionais', 'pluri': 'CIDs Adicionais'
         },
         'cids_descricao': {
+            'fabitos': None,
             'workon': None,
             'greif': None,
             'merck': '=', 
@@ -310,6 +317,7 @@ class DataframeTreatment:
             'leroy': 'Descrição do Cid Adicional', 'pluri': 'Descrição do Cid Adicional'
         },
         'cpf': {
+            'fabitos': 'cpf_2',
             'workon': 'CPF',
             'greif': 'CPF do Funcionário',
             'merck': 'CPF', 
@@ -320,6 +328,7 @@ class DataframeTreatment:
             'leroy': 'CPF', 'pluri': 'CPF'
         },
         'nome_funcionario': {
+            'fabitos': 'nome_do_colaborador_1',
             'workon': 'Nome',
             'greif': 'Funcionário',
             'merck': 'Nome', 
@@ -330,6 +339,7 @@ class DataframeTreatment:
             'leroy': 'Funcionário', 'pluri': 'Funcionário'
         },
         'matricula': {
+            'fabitos': None,
             'workon': 'Matricula RH',
             'greif': 'Matrícula do Funcionário',
             'merck': 'Matrícula', 
@@ -340,6 +350,7 @@ class DataframeTreatment:
             'leroy': 'Matrícula', 'pluri': 'Matrícula'
         },
         'dias_afastamento': {
+            'fabitos': 'dias_de_afastamento',
             'workon': None,
             'greif': 'Quantidade de dias',
             'merck': 'Dias Perdidos', 
@@ -350,6 +361,7 @@ class DataframeTreatment:
             'leroy': 'Dias Afastados', 'pluri': 'Dias Afastados'
         },
         'data_inicio': {
+            'fabitos': 'data_inicial',
             'workon': 'Inicio',
             'greif': 'Atestado Data Inicio',
             'merck': 'Data Início', 
@@ -360,6 +372,7 @@ class DataframeTreatment:
             'leroy': 'Início', 'pluri': 'Início'
         },
         'data_retorno': {
+            'fabitos': 'data_final',
             'workon': 'Termino',
             'greif': 'Data Encerramento',
             'merck': 'Data Término', 
@@ -370,6 +383,7 @@ class DataframeTreatment:
             'leroy': 'Fim', 'pluri': 'Fim'
         },
         'data_lancamento': {
+            'fabitos': None,
             'workon': None,
             'greif': None,
             'merck': None, 
@@ -380,6 +394,7 @@ class DataframeTreatment:
             'leroy': None, 'pluri': None
         },
         'hora_inicio': {
+            'fabitos': '=',
             'workon': None,
             'greif': '=',
             'merck': 'Hora Início', 
@@ -390,6 +405,7 @@ class DataframeTreatment:
             'leroy': 'Hora Inicial', 'pluri': 'Hora Inicial'
         },
         'hora_fim': {
+            'fabitos': '=',
             'workon': None,
             'greif': '=',
             'merck': 'Hora Término', 
@@ -400,6 +416,7 @@ class DataframeTreatment:
             'leroy': 'Hora Final', 'pluri': 'Hora Final'
         },
         'nome_prestador': {
+            'fabitos': 'medico',
             'workon': 'Medico_Nome',
             'greif': 'Nome do Médico',
             'merck': 'Responsável', 
@@ -410,6 +427,7 @@ class DataframeTreatment:
             'leroy': 'Médico Solicitante', 'pluri': 'Médico Solicitante'
         },
         'identificador_prestador': {
+            'fabitos': None,
             'workon': 'Medico_Numero',
             'greif': 'Atestado Crm',
             'merck': 'Registro', 
@@ -420,6 +438,7 @@ class DataframeTreatment:
             'leroy': 'Conselho de Classe', 'pluri': 'Conselho de Classe'
         },
         'estado_prestador': {
+            'fabitos': None,
             'workon': None,
             'greif': 'Estado',
             'merck': 'Regional', 
@@ -430,6 +449,7 @@ class DataframeTreatment:
             'leroy': 'UF', 'pluri': 'UF'
         },
         'local': {
+            'fabitos': 'local_do_exame',
             'workon': 'LOCAL DE EMISSÃO',
             'greif': 'Empresa',
             'merck': 'Unidade', 
@@ -440,6 +460,7 @@ class DataframeTreatment:
             'leroy': 'Unidade', 'pluri': 'Unidade'
         },
         'tipo': {
+            'fabitos': 'tipo_de_atestado',
             'workon': None,
             'greif': None,
             'merck': None, 
@@ -450,6 +471,7 @@ class DataframeTreatment:
             'leroy': 'Tipo Licença', 'pluri': 'Tipo Licença'
         },
         'codigo_tipo': {
+            'fabitos': None,
             'workon': None,
             'greif': None,
             'merck': None, 
@@ -460,6 +482,7 @@ class DataframeTreatment:
             'leroy': None, 'pluri': None
         },
         'tipo_prestador': {
+            'fabitos': None,
             'workon': 'Medico_Tipo',
             'greif': None,
             'merck': 'Conselho', 
@@ -470,7 +493,8 @@ class DataframeTreatment:
             'leroy': None, 'pluri': None
         },
         # 'crm': {
-        #     'workon': 'Medico_Numero',
+        # 'fabitos': None,    
+        # 'workon': 'Medico_Numero',
         #     'greif': 'Atestado Crm',
         #     'merck': 'Registro', 
         #     'rech': None, 
