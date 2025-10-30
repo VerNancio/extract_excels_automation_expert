@@ -181,14 +181,16 @@ class DataframeTreatment:
             axis=1
         )
         
-        # Formatação de data
-        df['data_inicio'] = pd.to_datetime(df['data_inicio']).dt.strftime('%d-%m-%Y')
-        df['data_retorno'] = pd.to_datetime(df['data_retorno']).dt.strftime('%d-%m-%Y')
-        
-        # Se ainda não tiver data de retorno definida, valor padrão
+        # Converter para datetime64[s] para evitar overflow
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce', dayfirst=True).astype('datetime64[s]')
+        df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce', dayfirst=True).astype('datetime64[s]')
+
+        # Formatar para dd-mm-YYYY, mantendo NaT como string vazia
+        df['data_inicio'] = df['data_inicio'].dt.strftime('%d-%m-%Y')
+        df['data_retorno'] = df['data_retorno'].dt.strftime('%d-%m-%Y')
+
+        # Substituir valores nulos por padrão
         df.loc[pd.isnull(df['data_retorno']), 'data_retorno'] = date_without_value
-        
-        # Se a não tiver data de inicio definida, valor padrão
         df.loc[pd.isnull(df['data_inicio']), 'data_inicio'] = date_without_value
 
         return df
