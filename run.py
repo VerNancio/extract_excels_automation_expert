@@ -25,7 +25,6 @@ if __name__ == '__main__':
                     "--report_type:<'hour'/'date'>\n" 
 
     kwargs = sys.argv[1:]
-
     if any(help_arg in kwarg for help_arg in ['-h', '--h', '-help', '--help'] for kwarg in kwargs):
         print(help_msg)
         

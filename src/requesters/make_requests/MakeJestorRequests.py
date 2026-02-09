@@ -59,11 +59,11 @@ class MakeJestorRequests:
         
         if self.client_name == 'fabitos':
             df = self.fabitos_get_request()
-            if df is not None:
-                self.fabito_check_request(df['name'].copy().to_list())
-                # df.to_excel('a.xlsx')
-            else:
-                return None
+            # if df is not None:
+            #     self.fabito_check_request(df['name'].copy().to_list())
+            #     # df.to_excel('a.xlsx')
+            # else:
+            #     return None
             
         else:
             emails: dict[str, str] = {
@@ -130,6 +130,8 @@ class MakeJestorRequests:
 
         all_rows: list[dict] = data['items']
         df: DataFrame = pd.json_normalize(all_rows)
+        
+        print(df.columns)        
         print(df)
         
         if df.empty:

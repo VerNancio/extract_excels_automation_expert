@@ -237,7 +237,7 @@ class GreifSeleniumScrapying:
 
         for i, ticket_id in enumerate(tickets_ids):
 
-            print(f'{ticket_id}: Realizando de extrações adicionais do ticket Nº{i}')
+            print(f'Nº{i}: Realizando de extrações adicionais do ticket {ticket_id}')
             
             # Procura o ticket pelo id na barra de pesquisa
             select_search_elmnt = self.driver.find_element(By.ID, 'fast_search_f0_top')
@@ -296,14 +296,21 @@ class GreifSeleniumScrapying:
 
             # send_response_bttn = self.driver.find_element(By.ID, 'sc_ins_line_1')
             # self.driver.execute_script("arguments[0].click();", send_response_bttn)
-            sleep(1)
+            sleep(2)
 
 
             # Muda iframe e baixa o arquivo com as demais infos do usuário
             self.driver.switch_to.default_content()
             self.driver.switch_to.frame('iframe_menu_administrador')
-            xlsx_export_bttn = self.driver.find_element(By.ID, 'sc_export_top')
-            self.driver.execute_script("arguments[0].click();", xlsx_export_bttn)
+            
+            for _ in range(3):
+                try: 
+                    # xlsx_export_bttn = wait.until(EC.frame_to_be_available_and_switch_to_it((By.ID, "sc_export_top")))
+                    xlsx_export_bttn = self.driver.find_element(By.ID, 'sc_export_top')
+                    self.driver.execute_script("arguments[0].click();", xlsx_export_bttn)
+                    break
+                except Exception:
+                    print(f"Não foi possível abrir o ticket {ticket_id} para download do xlsx.")
 
             self.driver.switch_to.frame('TB_iframeContent')
 

@@ -38,8 +38,14 @@ def main(**kwargs):
 
     date_formatter = DateFormatter()
     date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
-    start_date: str = kwargs.get('start_date', date_formatter.last_working_day())
-    end_date: str = kwargs.get('end_date', date_formatter.yesterday())
+    
+    
+    if client_name in ['coop', 'copa', 'bimbo', 'merck']:
+        start_date: str = date_formatter.last_month_first_day()
+        end_date: str = date_formatter.last_month_last_day()
+    else:
+        start_date: str = kwargs.get('start_date', date_formatter.last_working_day())
+        end_date: str = kwargs.get('end_date', date_formatter.yesterday())
     
     # Se a data de inicio for maior que a da de fim de busca
     if date_formatter.to_datetime(start_date) > date_formatter.to_datetime(end_date):

@@ -8,6 +8,7 @@ import zipfile
 
 import requests as req
 
+# from seleniumwire import webdriver
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -100,27 +101,33 @@ class SocSeleniumScrapying:
         url: str = 'https://sistema.soc.com.br/WebSoc/'
         
         self.driver.get(url)
+        
+        input('---------------------------------')
+        
+        print(self.credentials)
 
-        username_input = self.driver.find_element(By.ID, 'usu')
+        username_input: WebElement = self.driver.find_element(By.ID, 'usu')
         for char in self.credentials['login_email']:
             username_input.send_keys(char)
             sleep(0.02)
 
-        pw_input = self.driver.find_element(By.ID, 'senha')
+        pw_input: WebElement = self.driver.find_element(By.ID, 'senha')
         for char in self.credentials['login_pw']:
             pw_input.send_keys(char)
             sleep(0.02)
         
-        pw_input: WebElement = self.driver.find_element(By.ID, 'empsoc')
-        self.driver.execute_script(f"arguments[0].value = '{self.credentials['login_id']}';", pw_input)
+        id_input: WebElement = self.driver.find_element(By.ID, 'empsoc')
+        self.driver.execute_script(f"arguments[0].value = '{self.credentials['login_id']}';", id_input)
+        
+        input('.......................................')
         
         login_bttn = self.driver.find_element(By.ID, 'bt_entrar')
         login_bttn.click()
         sleep(4)
         
-        any_alerts_items: WebElement = self.driver.find_elements(By.CLASS_NAME, 'modalAlerta')
-        if len(any_alerts_items) > 0:
-            raise SessionNotCreatedException('Falha ao realizar login no SOC')
+        # any_alerts_items: WebElement = self.driver.find_elements(By.CLASS_NAME, 'modalAlerta')
+        # if len(any_alerts_items) > 0:
+        #     raise SessionNotCreatedException('Falha ao realizar login no SOC')
         
 
     def go_to_menu(self) -> None:       
@@ -183,16 +190,11 @@ class SocSeleniumScrapying:
         classification_dropdown_options: WebElement = self.driver.find_element(By.ID, 'lista-classificacao')
         list_classification_option: WebElement = classification_dropdown_options.find_element(By.XPATH, '//li[@data-valor="6"]')
         list_classification_option.click()
-        # self.driver.execute_script("arguments[0].value = 'Listagem';", classification_dropdown)
         
-        # input('.............')
         all_situations_clickable: WebElement = self.driver.find_element(By.ID, 'spn-checkbox-lista-check-tipo-exame-ipt-check-rel007form-filtrarfuncionario-0')
         all_situations_clickable.click()
         
         show_name_checkbox: WebElement = self.driver.find_element(By.XPATH, '//input[@name="rel007Form.aparecerNomeFuncionario"]')
-        self.driver.execute_script("arguments[0].click();", show_name_checkbox)
-        
-        # input('...')
         
         
     def request_and_download_xlsx(self) -> None:

@@ -73,6 +73,7 @@ class MakeCloseRequests:
         end_date = date_formatter.format_date(end_date) if end_date is not None else date_formatter.today()
 
         params: str = f'export=true&format=xlsx&start_date={start_date}&end_date={end_date}&sync_status=error&sync_status=success&sync_status=not_sync&field_date=updated_at&status=valid'
+        # export=true&format=xlsx&start_date=2025-11-20&end_date=2025-11-20&sync_status=error&sync_status=success&sync_status=not_sync&field_date=updated_at&status=valid
         
         headers = {
             "Authorization": f"Bearer {token}",
