@@ -69,8 +69,9 @@ class MakeCloseRequests:
 
         date_formatter = DateFormatter(default_format='iso')
 
-        start_date = date_formatter.format_date(start_date) if start_date is not None else date_formatter.today()
-        end_date = date_formatter.format_date(end_date) if end_date is not None else date_formatter.today()
+        start_date = date_formatter.format_date(start_date) if start_date is not None else date_formatter.last_working_day()
+        end_date = date_formatter.format_date(end_date) if end_date is not None else date_formatter.yesterday()
+
 
         params: str = f'export=true&format=xlsx&start_date={start_date}&end_date={end_date}&sync_status=error&sync_status=success&sync_status=not_sync&field_date=updated_at&status=valid'
         # export=true&format=xlsx&start_date=2025-11-20&end_date=2025-11-20&sync_status=error&sync_status=success&sync_status=not_sync&field_date=updated_at&status=valid

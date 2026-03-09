@@ -48,12 +48,39 @@ class HandleKWargs:
         return save_with_date_in_name
     
     
+    def handle_date_to_filter(self) -> bool:
+        # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a date_to_save
+        date_to_filter_kw = self.kwargs.get('date_to_filter', 'ultimo_dia_util')
+        
+        date_to_filter: str
+        date_formatter = DateFormatter()
+
+        match date_to_filter_kw:
+            case 'hoje':
+                date_to_filter = date_formatter.today()
+            case 'ontem':
+                date_to_filter = date_formatter.yesterday()
+            case 'ultimo_dia_util':
+                date_to_filter = date_formatter.last_working_day()
+            case 'ultimo_dia_ultimo_mes':
+                date_to_filter = date_formatter.last_month_last_day()
+            case _:
+                if date_formatter.is_valid_date(date_to_filter_kw):
+                    return date_to_filter_kw
+                
+                raise ValueError('KWarg do lugar onde o arquivo deve ser armazenado não possuí valor válido: "date_to_filter"\n' \
+                                'Necessário passar como uma data válida, "hoje", "ontem", "ultimo_dia_util", "ultimo_dia_ultimo_mes", ou deixar como nulo (que tem valor padrão de "ultimo_dia_util")')
+                
+        return date_to_filter
+        
+    
     def handle_date_to_save(self) -> bool:
         # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a date_to_save
         date_to_save_kw = self.kwargs.get('date_to_save', 'ultimo_dia_util')
         
         date_to_save: str
         date_formatter = DateFormatter()
+            
         match date_to_save_kw:
             case 'hoje':
                 date_to_save = date_formatter.today()
@@ -64,8 +91,11 @@ class HandleKWargs:
             case 'ultimo_dia_ultimo_mes':
                 date_to_save = date_formatter.last_month_last_day()
             case _:
+                if date_formatter.is_valid_date(date_to_save_kw):
+                    return date_to_save_kw
+        
                 raise ValueError('KWarg do lugar onde o arquivo deve ser armazenado não possuí valor válido: "date_to_save"\n' \
-                                'Necessário passar como "hoje", "ontem", "ultimo_dia_util" ou "ultimo_dia_ultimo_mes", ou deixar como nulo (que tem valor padrão de "ultimo_dia_util")')
+                                'Necessário passar como uma data válida, "hoje", "ontem", "ultimo_dia_util", "ultimo_dia_ultimo_mes", ou deixar como nulo (que tem valor padrão de "ultimo_dia_util")')
                 
         return date_to_save
         
