@@ -106,7 +106,7 @@ class GreifSeleniumScrapying:
 
 
     def go_to_menu(self) -> None:
-
+        
         first_menu_clickable = self.driver.find_element(By.CSS_SELECTOR, '.nav-item.Suporte.RH.webAPP') \
                                           .find_element(By.TAG_NAME, 'a')
         self.driver.execute_script("arguments[0].scrollIntoView(true);", first_menu_clickable)

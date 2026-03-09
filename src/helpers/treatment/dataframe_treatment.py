@@ -176,7 +176,12 @@ class DataframeTreatment:
         if 'data_retorno' not in df.columns:
             df['data_retorno'] = pd.NaT
 
-        df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce')
+        # df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce')
+        df['data_retorno'] = pd.to_datetime(
+            df['data_retorno'],
+            format='%d/%m/%Y',
+            errors='coerce'
+        )
 
         # Máscara
         mask = df['dias_afastamento'].notna() & df['data_retorno'].isna()
