@@ -110,10 +110,10 @@ class MakeJestorRequests:
             "nested_type": "onlyrefs",
             "filters": [
                     {"field": "fase","type":"list", "operator":"in", "value":"Aprovado"},
-                    # {"field": "ja_feita_a_coleta", "type":"boolean", "value":"0"},
+                    {"field": "ja_feita_a_coleta", "type":"boolean", "value":"0"},
 
                     # 220 == cod. da fabitos -> ter que fazer um dict p/ clientes da tabela
-                    # {"field": "clientes_expert","type":"list", "operator": "in", "value":"220"}
+                    {"field": "clientes_expert","type":"list", "operator": "in", "value":"220"}
             ],
             "token":"cc0da72ab3741491dec8f2daf2a95bba"
         }

@@ -156,75 +156,7 @@ class DataframeTreatment:
 
     @staticmethod
     def add_return_date_column(df: DataFrame) -> DataFrame:
-<<<<<<< HEAD
 
-        if 'dias_afastamento' not in df.columns:
-            raise KeyError("A coluna 'dias_afastamento' não existe no DataFrame")
-
-        # Extrai apenas número
-        df['dias_afastamento'] = (
-            df['dias_afastamento']
-            .astype(str)
-            .str.extract(r'(\d+)')[0]
-        )
-
-        df['dias_afastamento'] = pd.to_numeric(df['dias_afastamento'], errors='coerce')
-
-        # 🔥 Converte datas uma única vez
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
-
-        # 🔥 GARANTE que data_retorno seja datetime
-        if 'data_retorno' not in df.columns:
-            df['data_retorno'] = pd.NaT
-
-        # df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce')
-        df['data_retorno'] = pd.to_datetime(
-            df['data_retorno'],
-            format='%d/%m/%Y',
-            errors='coerce'
-        )
-<<<<<<< HEAD
-
-        # Máscara
-        mask = df['dias_afastamento'].notna() & df['data_retorno'].isna()
-
-        # 🔥 Cálculo vetorizado (sem apply!)
-        df.loc[mask, 'data_retorno'] = (
-            df.loc[mask, 'data_inicio'] +
-            pd.to_timedelta(df.loc[mask, 'dias_afastamento'], unit='D')
-        )
-
-        # Valor padrão
-        date_without_value = "31/12/9999"
-
-        # 🔥 Só agora formata para string
-        df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
-        df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
-
-        df['data_inicio'] = df['data_inicio'].fillna(date_without_value)
-        df['data_retorno'] = df['data_retorno'].fillna(date_without_value)
-=======
-
-        # Máscara
-        mask = df['dias_afastamento'].notna() & df['data_retorno'].isna()
-
-        # 🔥 Cálculo vetorizado (sem apply!)
-        df.loc[mask, 'data_retorno'] = (
-            df.loc[mask, 'data_inicio'] +
-            pd.to_timedelta(df.loc[mask, 'dias_afastamento'], unit='D')
-        )
-
-        # Valor padrão
-        date_without_value = "31/12/9999"
-
-        # 🔥 Só agora formata para string
-        df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
-        df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
-
-        df['data_inicio'] = df['data_inicio'].fillna(date_without_value)
-        df['data_retorno'] = df['data_retorno'].fillna(date_without_value)
-=======
-        
         default_null_date = pd.Timestamp("9999-12-31")
 
         if 'data_inicio' not in df.columns:
@@ -248,10 +180,10 @@ class DataframeTreatment:
         )
 
         # Converte datas
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], dayfirst=True)
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
         # df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
         
-        df['data_retorno'] = pd.to_datetime(df['data_retorno'], dayfirst=True)
+        df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce')
         # df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
         
         
@@ -275,8 +207,6 @@ class DataframeTreatment:
         # Formatar saída
         df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
         df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
->>>>>>> ac227ae (...)
->>>>>>> 7a617733e42d741cfec8d3e33355c52b72e56a5a
 
         return df
 
