@@ -41,11 +41,9 @@ class DataframeTreatment:
         default_column_names: list[str] = c_names_dict.keys()
         columns_to_be_treated: list[str] = DT.DEFAULT_TREATEMENTS.keys()
 
-        print(df_to_return)
         df_to_return = DT.rename_columns_names(df_to_return, client_name)
         df_to_return = DT.change_column_types(df_to_return)
         
-
         # Criação das colunas com dados vazios (pq a planilha básica não tem eles)
         renamed_columns: list[str] = df_to_return.columns.to_list()
 
@@ -88,16 +86,23 @@ class DataframeTreatment:
                     # Acrescenta 'afastamento e declaração de horas' a todas a colunas do tipo
                     df_to_return['tipo'] = ''
                     
-        # Temporario -- tentativa de salvar o datetime com a data somente
-        # df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
-        # df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
+                    
+        # Temporario (que vai ficar por hora) -- tentativa de salvar o datetime com a data somente
+        df_to_return['data_inicio'] = pd.to_datetime(df_to_return['data_inicio'], format='%d/%m/%Y', errors='coerce')
+        df_to_return['data_inicio'] = df_to_return['data_inicio'].dt.strftime('%d/%m/%Y')
         
-        # df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
-        # df_to_return['data_retorno'] = df_to_return['data_retorno'].dt.strftime('%d/%m/%Y')
-
+        df_to_return['data_retorno'] = pd.to_datetime(df_to_return['data_retorno'], format='%d/%m/%Y', errors='coerce')
+        df_to_return['data_retorno'] = df_to_return['data_retorno'].dt.strftime('%d/%m/%Y')
+        
         # df_to_return.loc[pd.isna(df_to_return['data_retorno']), 'data_retorno'] = dt.datetime(9999, 12, 31).strftime('%d/%m/%Y')
 
-        return df_to_return[DT.ALL_MODEL_COLUMNS]
+        # Filtra somente as colunas relevantes pro modelo (pq tem umas colunas a mais que não tem na planilha modelo, mas que tbm não tem valor nenhum, então n tem problema deixar elas de fora)
+        df_to_return = df_to_return[DT.ALL_RELEVANT_MODEL_COLUMNS]
+        
+        # Adiciona as colunas que são necessárias pra planilha modelo, mas que não tem valor nenhum (pq a planilha básica não tem eles)
+        df_to_return = DT.add_useless_columns(df_to_return)
+        
+        return df_to_return
 
 
     @staticmethod
@@ -130,11 +135,11 @@ class DataframeTreatment:
     def change_column_types(df: DataFrame) -> DataFrame:
 
         c_types_dict: dict = DataframeTreatment.NECESSARY_EXPLICIT_TYPE_DECLARATION
-
+        
         for c_name in c_types_dict.keys():
-            if c_name in df.columns.to_list():
+            if c_name in df.columns:
                 df[c_name] = df[c_name].astype(c_types_dict[c_name])
-
+                
         return df
     
 
@@ -152,48 +157,90 @@ class DataframeTreatment:
     @staticmethod
     def add_return_date_column(df: DataFrame) -> DataFrame:
 
-        # Garante que a coluna existe
         if 'dias_afastamento' not in df.columns:
             raise KeyError("A coluna 'dias_afastamento' não existe no DataFrame")
 
-        # Extrai somente o número de dias
-        df['dias_afastamento'] = df['dias_afastamento'].astype(str).str.extract(r'(\d+)')
-        
-        # Converte para numérico, valores inválidos viram NaN
+        # Extrai apenas número
+        df['dias_afastamento'] = (
+            df['dias_afastamento']
+            .astype(str)
+            .str.extract(r'(\d+)')[0]
+        )
+
         df['dias_afastamento'] = pd.to_numeric(df['dias_afastamento'], errors='coerce')
 
-        # Converte datas (mais tolerante)
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce', dayfirst=True)
+        # 🔥 Converte datas uma única vez
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
 
-        # Data caso nao haja data de retorno
-        date_without_value = dt.datetime(9999, 12, 31).strftime('%d-%m-%Y')
-
-        # Se a coluna não existir ainda, cria com NaT
+        # 🔥 GARANTE que data_retorno seja datetime
         if 'data_retorno' not in df.columns:
             df['data_retorno'] = pd.NaT
 
-        # Máscara apenas para linhas que precisam de cálculo
-        mask = pd.notnull(df['dias_afastamento']) & pd.isnull(df['data_retorno'])
-        
-        # Calcula a data de retorno apenas nessas linhas
-        df.loc[mask, 'data_retorno'] = df.loc[mask].apply(
-            lambda x: x['data_inicio'] + dt.timedelta(days=int(x['dias_afastamento'])),
-            axis=1
+        # df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce')
+        df['data_retorno'] = pd.to_datetime(
+            df['data_retorno'],
+            format='%d/%m/%Y',
+            errors='coerce'
         )
-        
-        # Converter para datetime64[s] para evitar overflow
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce', dayfirst=True).astype('datetime64[s]')
-        df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce', dayfirst=True).astype('datetime64[s]')
 
-        # Formatar para dd-mm-YYYY, mantendo NaT como string vazia
-        df['data_inicio'] = df['data_inicio'].dt.strftime('%d-%m-%Y')
-        df['data_retorno'] = df['data_retorno'].dt.strftime('%d-%m-%Y')
+        # Máscara
+        mask = df['dias_afastamento'].notna() & df['data_retorno'].isna()
 
-        # Substituir valores nulos por padrão
-        df.loc[pd.isnull(df['data_retorno']), 'data_retorno'] = date_without_value
-        df.loc[pd.isnull(df['data_inicio']), 'data_inicio'] = date_without_value
+        # 🔥 Cálculo vetorizado (sem apply!)
+        df.loc[mask, 'data_retorno'] = (
+            df.loc[mask, 'data_inicio'] +
+            pd.to_timedelta(df.loc[mask, 'dias_afastamento'], unit='D')
+        )
+
+        # Valor padrão
+        date_without_value = "31/12/9999"
+
+        # 🔥 Só agora formata para string
+        df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
+        df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
+
+        df['data_inicio'] = df['data_inicio'].fillna(date_without_value)
+        df['data_retorno'] = df['data_retorno'].fillna(date_without_value)
 
         return df
+
+
+    @staticmethod
+    def add_useless_columns(df: DataFrame) -> DataFrame:
+        """_Adiciona ao df colunas que são necessárias na planilha \
+            pra funcionar no BI, mas que não precisam de valores_
+
+        Args:
+            df (DataFrame): _description_
+
+        Returns:
+            DataFrame: _description_
+        """
+        
+        columns_to_add = [
+            'codigo_situacao',
+            'data_atualizacao',
+            'dias_justificados',
+            'dose_vacina',
+            'formato_data',
+            'fuso_horario',
+            'id_atestado',
+            'identificador_funcionario',
+            'minutos',
+            'minutos_deslocamento_antes',
+            'minutos_deslocamento_depois',
+            'nome_vacina',
+            'observacao',
+            'protocolo',
+            'status',
+            'tipo_identificador'
+        ]
+
+        for c in columns_to_add:
+            df[c] = pd.NA
+            
+        return df
+        
     
 
     # @staticmethod
@@ -245,18 +292,47 @@ class DataframeTreatment:
             # df.loc[pd.isna(df['cpf'])].dropna(subset=['cpf'], inplace=True)
             # loc[pd.isna(df_to_return['data_retorno']), 'data_retorno']
             
+        if column_name == 'identificador_prestador':
+            df['identificador_prestador'] = df['identificador_prestador'].astype(str)
+            df['identificador_prestador'] = df['identificador_prestador'].str.replace(r".0", "", regex=True)
+            
         if column_name == 'cids':
+            
+            df_cids = pd.read_csv('./data/CID-10.csv', dtype=str, sep=';', encoding="latin1")
+            CID_SET: set[str] = set(df_cids['SUBCAT'].str.upper().str.strip())
+            
             # Substitui valores NaN reais ou string "nan" por string vazia
-            df.loc[df['cids'].isna() | (df['cids'].astype(str).str.lower() == "nan"), 'cids'] = ""
+            # df.loc[df['cids'].isna() | (df['cids'].astype(str).str.lower() == "nan"), 'cids'] = ""
+            df.loc[df['cids'].isna(), 'cids'] = ''
 
             # Exemplo extra: se quiser normalizar "s/c" também
-            df.loc[df['cids'].astype(str).str.lower() == "s/c", 'cids'] = ""
-
+            # df.loc[df['cids'].astype(str).str.lower() == "s/c", 'cids'] = ""
+            
+            others_invalid_values: set[str] = {
+                'none', 'nan', 's/c', 'sem cid', 
+                'sem código', 'sem código cid', 'sem informação', 
+                'sem dados', 'não informado', 'n/a'
+            }
+            
+            df.loc[df['cids'].astype(str).str.lower().isin(others_invalid_values), 'cids'] = ''
+            
+            # Tratamento pra comparação
+            df['cids'] = df['cids'].str.extract(r'([A-Z]\d{2,3})')
+            df.loc[df['cids'].astype(str).str.lower().isin(CID_SET), 'cids'] = ''
+            
+            # Caso haja multiplos cids em uma mesma célula, extrai somente o primeiro que é o mais relevante (ex: "G560 / G561" -> "G560")
+            df["cids"] = (
+                df["cids"]
+                .astype(str)
+                .str.upper()
+                .str.extract(r'([A-Z]\d{2}\.?\d?)')[0]
+            )
+            
         return df[column_name].apply(DataframeTreatment.DEFAULT_TREATEMENTS[column_name])
 
 
     NECESSARY_MODEL_COLUMNS: list[str] = ['cpf', 'data_inicio', 'data_fim', 'data_lancamento', 'nome_funcionario']
-    ALL_MODEL_COLUMNS: list[str] = [
+    ALL_RELEVANT_MODEL_COLUMNS: list[str] = [
                                     'cids', 'cids_descricao', 'cpf', 'data_retorno', 
                                     'data_inicio', 'data_lancamento', 'estado_prestador', 
                                     'hora_fim', 'hora_inicio', 'identificador_prestador', 
@@ -267,7 +343,9 @@ class DataframeTreatment:
     NECESSARY_EXPLICIT_TYPE_DECLARATION: dict[str] = {
         'cpf': str,
         'nome_funcionario': str,
-        'cids': str
+        'cids': str,
+        'identificador_prestador': str,
+        'matricula': str
     }
 
     NECESSARY_NON_NULL_VALUES: list[str] = [
@@ -293,6 +371,7 @@ class DataframeTreatment:
             if pd.notna(cpf) and str(cpf).strip().lower() not in ['nan', 'none', '']
             else ''
         ),
+        'identificador_prestador': lambda x: re.sub(r"[.-]", "", str(x)) if pd.notna(x) else x
     }
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {

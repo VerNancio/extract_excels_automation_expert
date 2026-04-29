@@ -34,13 +34,15 @@ def main(**kwargs):
     should_store_where: str = handler.handle_non_existents_storage_places()
     report_type: str = handler.handle_non_existents_report_types()
     save_with_date_in_name: bool = handler.handle_non_existents_report_types()
+    
+    # date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
+    
     date_to_save: str = handler.handle_date_to_save()
+    date_to_filter: str = handler.handle_date_to_filter()
 
     date_formatter = DateFormatter()
-    date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
     
-    
-    if client_name in ['coop', 'copa', 'bimbo', 'merck']:
+    if client_name in ['merck']:
         start_date: str = date_formatter.last_month_first_day()
         end_date: str = date_formatter.last_month_last_day()
     else:
@@ -85,6 +87,7 @@ def main(**kwargs):
 
     # Faz o tratamento do df, retorna já pronto pra ser salvo
     df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
+    print(df_treated['cpf'])
     
     try: 
 

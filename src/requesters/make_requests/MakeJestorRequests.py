@@ -18,7 +18,7 @@ class MakeJestorRequests:
 
     client_name: str
     sender_email: str
-    list_size: int = 300
+    list_size: int = 500
 
     TABLE_HASH: str = 'q2ie0_wclkdcxb10ih77n'
     AUTH_TOKEN: dict
@@ -58,12 +58,13 @@ class MakeJestorRequests:
             ) -> DataFrame | None:
         
         if self.client_name == 'fabitos':
-            df = self.fabitos_get_request()
+            df = self.table_get_request()
+            print('---------------', len(df))
             # if df is not None:
-            #     self.fabito_check_request(df['name'].copy().to_list())
-            #     # df.to_excel('a.xlsx')
+                # self.fabito_check_request(df['name'].copy().to_list())
+                # df.to_excel('a.xlsx')
             # else:
-            #     return None
+                # return None
             
         else:
             emails: dict[str, str] = {
@@ -92,7 +93,7 @@ class MakeJestorRequests:
         print(f"Pasta de download temporária garantida em: {self.download_temp_dir_path}")
         
     
-    def fabitos_get_request(self) -> DataFrame | None:
+    def table_get_request(self) -> DataFrame | None:
         """_Recolhe da tabela dos atestados da Fabitos todos os registros \
             aprovados e que não foram coletados ainda_
 
@@ -106,14 +107,14 @@ class MakeJestorRequests:
         payload = {
             "object_type":"e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik",
             "size": self.list_size,
-            "nested_type":"onlyrefs",
-            "filters": {
-                "filters": [
-                    {"field":"fase","type":"list","operator":"in","value":"Aprovado"},
-                    {"field":"ja_feita_a_coleta","type":"boolean","value":"0"}
-                ]
-            },
-            "size": 300,
+            "nested_type": "onlyrefs",
+            "filters": [
+                    {"field": "fase","type":"list", "operator":"in", "value":"Aprovado"},
+                    # {"field": "ja_feita_a_coleta", "type":"boolean", "value":"0"},
+
+                    # 220 == cod. da fabitos -> ter que fazer um dict p/ clientes da tabela
+                    # {"field": "clientes_expert","type":"list", "operator": "in", "value":"220"}
+            ],
             "token":"cc0da72ab3741491dec8f2daf2a95bba"
         }
 
@@ -206,9 +207,9 @@ class MakeJestorRequests:
         URL = f"https://expertocupacional.api.jestor.com/object/{last_path}"
 
         filters = [
-                        {"field":"email_solicitante", "type":"string", "operator":"Exatamente igual", "value": self.sender_email},
-                        {"field":"jestor_is_draft", "type":"list", "operator":"in", "value":"0,1"}
-                ]
+            {"field":"email_solicitante", "type":"string", "operator":"Exatamente igual", "value": self.sender_email},
+            {"field":"jestor_is_draft", "type":"list", "operator":"in", "value":"0,1"}
+        ]
 
 
         payload = {
@@ -250,11 +251,18 @@ class MakeJestorRequests:
             row_send_date: str = row_send_datetime.strftime('%d/%m/%Y')
 
             category: str = row.get('classificacao')
+            
 
-            # Temporario pra filtrar por data e excluir as modelos I
-            if category == 'Modelo I' or row_send_date != self.row_post_date:
+            # Temporario pra filtrar excluindo as modelos I
+            # print(category, category == 'Modelo I')
+            if category == 'Modelo I':
                 continue
 
+            # Temporario pra filtrar pela data buscada
+            if row_send_date != self.row_post_date:
+                continue
+
+            print(row['data_de_criacao'])
             xlsx_url_path: str = row_attachments_dict['file']
             download_xlsx_url = f'https://files.jestor.com/expertocupacional/{xlsx_url_path}'
 
@@ -265,9 +273,9 @@ class MakeJestorRequests:
                 decrypted_file: io.BytesIO = self.decrypt_xlsx(file_pw=file_pw, content=response.content)
 
                 df: DataFrame = pd.read_excel(decrypted_file, engine="openpyxl")
-                print(df)
+                # print(df)
 
-                file_path: str = os.path.join(self.download_temp_dir_path, row_attachments_dict['name'])
+                file_path: str = os.path.join(self.download_temp_dir_path, f"{row_attachments_dict['name']} ... {row_send_date.replace('/', '-')}")
                 open(f'{file_path}.xlsx','wb').write(response.content)
                 df.to_excel(f'{file_path}.xlsx')
 

@@ -54,7 +54,10 @@ class RechSeleniumScrapying:
             return df
 
         except Exception as e:
-            print(f"Ocorreu um erro: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            print(f"Ocorreu um erro: {e.with_traceback(e.__traceback__)}")
 
         finally:
             self.driver.quit()
@@ -218,10 +221,17 @@ class RechSeleniumScrapying:
                 raise e
             
 
-        clients_items = data_box_items[:-1]
+        people_list = []
 
-        people_list: list[list[dict]] = []
-        for item in clients_items:
+        for i in range(len(data_box_items) - 1):
+
+            data_box_items = (
+                self.driver.find_element(By.ID, "ui-accordiontab-2-content")
+                .find_element(By.TAG_NAME, "div")
+                .find_elements(By.XPATH, "./*")
+            )
+
+            item = data_box_items[i]
             
             sleep(0.5)
 

@@ -38,6 +38,13 @@ class DateFormatter:
             self.date_format = date_format if date_format is not None else '%d/%m/%Y'
 
 
+    def is_valid_date(self, data_str: str, format: str = '%d/%m/%Y') -> bool:
+        try:
+            dt.date.strptime(data_str, format)
+            return True
+        except ValueError:
+            return False
+
     def set_new_format(self, default_format: str, custom_format: str) -> None:
         """
         Adiciona os separadores a um formato de data.
