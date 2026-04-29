@@ -156,6 +156,7 @@ class DataframeTreatment:
 
     @staticmethod
     def add_return_date_column(df: DataFrame) -> DataFrame:
+<<<<<<< HEAD
 
         if 'dias_afastamento' not in df.columns:
             raise KeyError("A coluna 'dias_afastamento' não existe no DataFrame")
@@ -201,6 +202,59 @@ class DataframeTreatment:
 
         df['data_inicio'] = df['data_inicio'].fillna(date_without_value)
         df['data_retorno'] = df['data_retorno'].fillna(date_without_value)
+=======
+        
+        default_null_date = pd.Timestamp("9999-12-31")
+
+        if 'data_inicio' not in df.columns:
+            raise KeyError("A coluna 'data_inicio' não existe no DataFrame")
+        
+        # Garantir coluna data_retorno
+        if 'data_retorno' not in df.columns.to_list():
+            df['data_retorno'] = pd.NA
+
+        # Garantir coluna dias_afastamento
+        if 'dias_afastamento' not in df.columns.to_list():
+            df['dias_afastamento'] = pd.NA
+
+        
+        # Extrai apenas número
+        df['dias_afastamento'] = (
+            df['dias_afastamento']
+            .astype(str)
+            .str.extract(r'(\d+)')[0]
+            .pipe(pd.to_numeric, errors='coerce')
+        )
+
+        # Converte datas
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], dayfirst=True)
+        # df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
+        
+        df['data_retorno'] = pd.to_datetime(df['data_retorno'], dayfirst=True)
+        # df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
+        
+        
+        df.to_excel('all.xlsx')
+
+        # Máscara para calcular retorno
+        mask_calculate = (
+            df['data_retorno'].isna() &
+            df['dias_afastamento'].notna() &
+            df['data_inicio'].notna()
+        )
+
+        df.loc[mask_calculate, 'data_retorno'] = (
+            df.loc[mask_calculate, 'data_inicio'] +
+            pd.to_timedelta(df.loc[mask_calculate, 'dias_afastamento'], unit='D')
+        )
+
+        # Linhas ainda sem retorno → padrão
+        df['data_retorno'] = df['data_retorno'].fillna(default_null_date)
+
+        # Formatar saída
+        df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
+        df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
+>>>>>>> ac227ae (...)
 
         return df
 
@@ -431,7 +485,7 @@ class DataframeTreatment:
             'leroy': 'Matrícula', 'pluri': 'Matrícula'
         },
         'dias_afastamento': {
-            'fabitos': 'dias_de_afastamento',
+            'fabitos': 'duracao_do_atestado',
             'workon': None,
             'greif': 'Quantidade de dias',
             'merck': 'Dias Perdidos', 
