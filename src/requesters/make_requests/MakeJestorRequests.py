@@ -59,12 +59,10 @@ class MakeJestorRequests:
         
         if self.client_name == 'fabitos':
             df = self.table_get_request()
-            print('---------------', len(df))
-            # if df is not None:
-                # self.fabito_check_request(df['name'].copy().to_list())
-                # df.to_excel('a.xlsx')
-            # else:
-                # return None
+            if df is not None:
+                self.table_check_request(df['name'].copy().to_list())
+            else:
+                return None
             
         else:
             emails: dict[str, str] = {
@@ -141,7 +139,7 @@ class MakeJestorRequests:
         return df
         
         
-    def fabito_check_request(self, ids_list: list[str]) -> None:
+    def table_check_request(self, ids_list: list[str]) -> None:
         """_Atualiza os registros que foram coletados no Jestor pra constarem como tal_
 
         Args:
@@ -277,6 +275,7 @@ class MakeJestorRequests:
 
                 file_path: str = os.path.join(self.download_temp_dir_path, f"{row_attachments_dict['name']} ... {row_send_date.replace('/', '-')}")
                 open(f'{file_path}.xlsx','wb').write(response.content)
+                
                 df.to_excel(f'{file_path}.xlsx')
 
         if df is None:

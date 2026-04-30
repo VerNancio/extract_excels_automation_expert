@@ -1,5 +1,9 @@
 from ...constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 from ..tools.date_formatter import DateFormatter
+import datetime as dt
+
+from typing import Literal
+
 
 class HandleKWargs:
 
@@ -47,6 +51,27 @@ class HandleKWargs:
 
         return save_with_date_in_name
     
+    
+    def handle_start_end_dates(self, necessary_default_filter_by: Literal['month', 'day']) -> tuple[str, str]:
+        
+        date_formatter = DateFormatter()
+        
+        # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a date_to_save
+        
+        if necessary_default_filter_by == 'month':
+            start_date: str = self.kwargs.get('start_date', date_formatter.last_month_first_day())
+            end_date: str = self.kwargs.get('end_date', date_formatter.last_month_last_day())
+        elif necessary_default_filter_by == 'day':
+            start_date: str = self.kwargs.get('start_date', date_formatter.last_working_day())
+            end_date: str = self.kwargs.get('end_date', date_formatter.yesterday())
+        
+        dt_f = date_formatter.get_curr_format()
+        
+        if dt.datetime.strptime(start_date, dt_f) > dt.datetime.strptime(end_date, dt_f):
+            raise ValueError('Data de inicio maior que a data final de filtro dos atestados')
+                
+        return start_date, end_date
+        
     
     def handle_date_to_filter(self) -> bool:
         # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a date_to_save

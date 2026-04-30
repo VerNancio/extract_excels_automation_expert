@@ -4,4 +4,6 @@ CLIENTS_NAMES_LIST = [
     'sulnorte', 'rip', 'ofy', 'fabitos'
 ]
 
+# CLIEM
+
 STORAGE_PLACES_XLSX = ['local', 'onedrive', 'both']

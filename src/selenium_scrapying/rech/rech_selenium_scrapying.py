@@ -49,7 +49,6 @@ class RechSeleniumScrapying:
             
             modelo_1_df = self.read_modelo_1()
             df['CPF'] = self.merge_df_with_modelo_1(df, modelo_1_df)['CPF']
-            df.to_excel('rech.xlsx')
 
             return df
 
@@ -200,14 +199,20 @@ class RechSeleniumScrapying:
         while last_items_in_box_qnt != (pending_num + 1): 
 
             try:
+                # while 1:...
                 # ui-accordion-content
                 # ui-accordiontab-0-content                
                 # ui-accordiontab-2-content
                 # ui-accordiontab-2
                 # data_box_items: list[WebElement] = self.driver.find_element(By.ID, 'ui-accordiontab-0-content') \
-                data_box_items: list[WebElement] = self.driver.find_element(By.ID, 'ui-accordiontab-2-content') \
-                                                                        .find_element(By.TAG_NAME, 'div') \
-                                                                        .find_elements(By.XPATH, "./*")
+                data_box_items: list[WebElement] = (
+                    self.driver.find_element(
+                        By.XPATH,
+                        "//*[starts-with(@id, 'ui-accordiontab-') and contains(@id, '-content')]"
+                    )
+                    .find_element(By.TAG_NAME, 'div')
+                    .find_elements(By.XPATH, "./*")
+                )
                 
                 class_str = data_box_items[-2].get_attribute('class')
                 class_list = class_str.split()
@@ -225,9 +230,12 @@ class RechSeleniumScrapying:
 
         for i in range(len(data_box_items) - 1):
 
-            data_box_items = (
-                self.driver.find_element(By.ID, "ui-accordiontab-2-content")
-                .find_element(By.TAG_NAME, "div")
+            data_box_items: list[WebElement] = (
+                self.driver.find_element(
+                    By.XPATH,
+                    "//*[starts-with(@id, 'ui-accordiontab-') and contains(@id, '-content')]"
+                )
+                .find_element(By.TAG_NAME, 'div')
                 .find_elements(By.XPATH, "./*")
             )
 

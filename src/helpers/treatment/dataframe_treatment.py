@@ -187,7 +187,7 @@ class DataframeTreatment:
         # df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
         
         
-        df.to_excel('all.xlsx')
+        # df.to_excel('all.xlsx')
 
         # Máscara para calcular retorno
         mask_calculate = (

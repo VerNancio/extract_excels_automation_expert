@@ -43,18 +43,18 @@ def main(**kwargs):
     date_formatter = DateFormatter()
     
     if client_name in ['merck']:
-        start_date: str = date_formatter.last_month_first_day()
-        end_date: str = date_formatter.last_month_last_day()
+        start_date, end_date = handler.handle_start_end_dates('month')
     else:
-        start_date: str = kwargs.get('start_date', date_formatter.last_working_day())
-        end_date: str = kwargs.get('end_date', date_formatter.yesterday())
+        start_date, end_date = handler.handle_start_end_dates('day')
+    
+    print(start_date, end_date)
     
     # Se a data de inicio for maior que a da de fim de busca
     if date_formatter.to_datetime(start_date) > date_formatter.to_datetime(end_date):
         raise ValueError("Data de início de busca maior que a final")
         
 
-    print(f'Iniciando extração dos dados do client: {client_name.capitalize()}\n')    
+    print(f'Iniciando extração dos dados do client: {client_name.capitalize()}\n') 
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         df: DataFrame = scraper.run()
@@ -63,11 +63,11 @@ def main(**kwargs):
         scraper = GreifSeleniumScrapying()
         df: DataFrame = scraper.run(date_to_filter=date_to_filter)
 
-    elif client_name == 'merck':
+    elif client_name == 'merck':    
         scraper = MerckSeleniumScrapying(report_type=report_type)
 
         # Nao é necessario indicar a data porque pega do mes passado inteiro automaticamente
-        df: DataFrame = scraper.run()
+        df: DataFrame = scraper.run(start_date=start_date, end_date=end_date)
 
     elif client_name in ['coop', 'copa', 'bimbo']:
         df: DataFrame = MakeCloseRequests.request_data(client_name=client_name, start_date=start_date, end_date=end_date)

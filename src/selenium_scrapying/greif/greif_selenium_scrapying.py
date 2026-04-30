@@ -52,7 +52,8 @@ class GreifSeleniumScrapying:
 
     def run(self, date_to_filter: str | None) -> DataFrame | None:
 
-        try:
+        # try:
+        if 1:
             self.do_login()
             self.go_to_menu()
 
@@ -73,10 +74,10 @@ class GreifSeleniumScrapying:
 
             return df
 
-        except Exception as e:
-            print(f"Ocorreu um erro: {e}")
+        # except Exception as e:
+            # print(f"Ocorreu um erro: {e}")
 
-        finally:
+        # finally:
             self.driver.quit()
             print("Navegador fechado.")
 
@@ -398,6 +399,9 @@ class GreifSeleniumScrapying:
             
 
     def pre_treat(self, df: DataFrame) -> DataFrame:
-        df.loc[df['Código(s) CID'].astype(str).str.strip() == 'Não informado', 'Código(s) CID'] = ''
+        df.loc[
+            df['Código(s) CID'].astype(str).str.strip() == 'Não informado',
+            'Código(s) CID'
+        ] = pd.NA
         return df
 

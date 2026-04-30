@@ -44,6 +44,9 @@ class DateFormatter:
             return True
         except ValueError:
             return False
+        
+    def get_curr_format(self) -> str:
+        return self.date_format
 
     def set_new_format(self, default_format: str, custom_format: str) -> None:
         """
