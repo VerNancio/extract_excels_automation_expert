@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup # pyright: ignore[reportMissingImports]
 import pandas as pd
 from pandas import DataFrame
 from io import StringIO
+from time import sleep
 
 from typing import Literal
 
@@ -93,6 +94,9 @@ class MerckSeleniumScrapying:
 
         # start_date = start_date if start_date else date_formatter.last_month_first_day()
         # end_date = end_date if end_date else date_formatter.last_month_last_day()
+        
+        # Sleep temporário que evita que a aplicação quebra ao fazer login (exp: rhmed ta gerando uma outra tela que está causando esse bo)
+        sleep(5)
 
         # Redireciona pra página com todos os registros em html
         if self.report_type == 'date':
@@ -102,6 +106,7 @@ class MerckSeleniumScrapying:
             
         html = self.driver.page_source
         soup = BeautifulSoup(html, "lxml")
+        
 
         # Verifica se há tabelas
         tables = soup.find_all("table")

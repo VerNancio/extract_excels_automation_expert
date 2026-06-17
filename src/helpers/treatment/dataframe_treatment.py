@@ -178,7 +178,7 @@ class DataframeTreatment:
             .str.extract(r'(\d+)')[0]
             .pipe(pd.to_numeric, errors='coerce')
         )
-
+        
         # Converte datas
         df['data_inicio'] = pd.to_datetime(df['data_inicio'], format='%d/%m/%Y', errors='coerce')
         # df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
