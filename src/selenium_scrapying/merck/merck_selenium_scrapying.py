@@ -23,6 +23,7 @@ from ...helpers.tools.date_formatter import DateFormatter
 
 from ...helpers.tools.get_credentials import get_credentials
 
+import traceback
 
 
 class MerckSeleniumScrapying:
@@ -48,20 +49,21 @@ class MerckSeleniumScrapying:
         
     def run(self, start_date: None = None, end_date: str = None) -> DataFrame | None:
 
-        try:
+        # try:
             self.do_login()
             
             df: DataFrame = self.get_all_reports_in_df(start_date, end_date)
             df = self.pre_treat_df(df)
-            
+            df.to_excel('merck.xlsx')
             return df
 
-        except Exception as e:
-            print(f"Ocorreu um erro: {e}")
+        # except Exception as e:
+            print(f"Ocorreu um erro: {e}, {e}")
 
-        finally:
+        # finally:
             self.driver.quit()
             print("Navegador fechado.")
+            traceback.print_exc()
 
 
     def do_login(self) -> None:
@@ -69,10 +71,10 @@ class MerckSeleniumScrapying:
         url: str = 'https://www.rhmed.com.br/evidamed/'
         
         self.driver.get(url)
-
+        
         script = """
-        document.querySelector('input[name="usuario"]').value = arguments[0];
-        document.querySelector('input[name="senha"]').value = arguments[1];
+        document.querySelector('input[name="login"]').value = arguments[0];
+        document.querySelector('input[name="password"]').value = arguments[1];
         document.querySelector('button#logar').click();
         """
 

@@ -1,9 +1,9 @@
 CLIENTS_NAMES_LIST = [
-    'leroy', 'rech', 'pluri', 'viva', 'workon',
-    'greif', 'coop', 'copa', 'bimbo', 'merck',
-    'sulnorte', 'rip', 'ofy', 'fabitos'
+    'leroy', 'pluri', 'viva', 
+    'coop', 'copa', 'bimbo', 
+    'rech', 'greif', 'merck',
+    'workon', 'sulnorte', 'rip', 'ofy', 
+    'fabitos', 'pergoletta'
 ]
-
-# CLIEM
 
 STORAGE_PLACES_XLSX = ['local', 'onedrive', 'both']

@@ -116,6 +116,7 @@ class HandleKWargs:
             case 'ultimo_dia_ultimo_mes':
                 date_to_save = date_formatter.last_month_last_day()
             case _:
+                return date_to_save_kw
                 if date_formatter.is_valid_date(date_to_save_kw):
                     return date_to_save_kw
         

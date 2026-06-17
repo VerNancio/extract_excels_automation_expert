@@ -69,14 +69,14 @@ def main(**kwargs):
         # Nao é necessario indicar a data porque pega do mes passado inteiro automaticamente
         df: DataFrame = scraper.run(start_date=start_date, end_date=end_date)
 
-    elif client_name in ['coop', 'copa', 'bimbo']:
+    elif client_name in ('coop', 'copa', 'bimbo'):
         df: DataFrame = MakeCloseRequests.request_data(client_name=client_name, start_date=start_date, end_date=end_date)
 
-    elif client_name in ['workon', 'sulnorte', 'ofy', 'rip', 'fabitos']:
+    elif client_name in ('workon', 'sulnorte', 'ofy', 'rip', 'fabitos', 'pergoletta'):
         requester = MakeJestorRequests(client_name=client_name)
         df = requester.run(row_post_date=date_to_filter)
 
-    elif client_name in ['leroy', 'pluri', 'viva']:
+    elif client_name in ('leroy', 'pluri', 'viva'):
         scraper = SocSeleniumScrapying(client_name=client_name)
         df: DataFrame = scraper.run(start_date=start_date, end_date=end_date)
 

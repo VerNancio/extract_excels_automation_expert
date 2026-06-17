@@ -180,10 +180,10 @@ class DataframeTreatment:
         )
 
         # Converte datas
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], format='%d/%m/%Y', errors='coerce')
         # df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
         
-        df['data_retorno'] = pd.to_datetime(df['data_retorno'], errors='coerce')
+        df['data_retorno'] = pd.to_datetime(df['data_retorno'], format='%d/%m/%Y', errors='coerce')
         # df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
         
         
@@ -382,6 +382,7 @@ class DataframeTreatment:
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
         'cids': {
+            'pergoletta': 'cid_1',
             'fabitos': 'cid_1',
             'workon': 'CID10',
             'greif': 'Código(s) CID',
@@ -393,6 +394,7 @@ class DataframeTreatment:
             'leroy': 'CIDs Adicionais', 'pluri': 'CIDs Adicionais'
         },
         'cids_descricao': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': None,
             'greif': None,
@@ -404,6 +406,7 @@ class DataframeTreatment:
             'leroy': 'Descrição do Cid Adicional', 'pluri': 'Descrição do Cid Adicional'
         },
         'cpf': {
+            'pergoletta': 'cpf_1',
             'fabitos': 'cpf_2',
             'workon': 'CPF',
             'greif': 'CPF do Funcionário',
@@ -415,6 +418,7 @@ class DataframeTreatment:
             'leroy': 'CPF', 'pluri': 'CPF'
         },
         'nome_funcionario': {
+            'pergoletta': 'nome_do_colaborador_1',
             'fabitos': 'nome_do_colaborador_1',
             'workon': 'Nome',
             'greif': 'Funcionário',
@@ -426,6 +430,7 @@ class DataframeTreatment:
             'leroy': 'Funcionário', 'pluri': 'Funcionário'
         },
         'matricula': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': 'Matricula RH',
             'greif': 'Matrícula do Funcionário',
@@ -437,6 +442,7 @@ class DataframeTreatment:
             'leroy': 'Matrícula', 'pluri': 'Matrícula'
         },
         'dias_afastamento': {
+            'pergoletta': 'duracao_do_atestado',
             'fabitos': 'duracao_do_atestado',
             'workon': None,
             'greif': 'Quantidade de dias',
@@ -448,6 +454,7 @@ class DataframeTreatment:
             'leroy': 'Dias Afastados', 'pluri': 'Dias Afastados'
         },
         'data_inicio': {
+            'pergoletta': 'data_inicial',
             'fabitos': 'data_inicial',
             'workon': 'Inicio',
             'greif': 'Atestado Data Inicio',
@@ -459,6 +466,7 @@ class DataframeTreatment:
             'leroy': 'Início', 'pluri': 'Início'
         },
         'data_retorno': {
+            'pergoletta': 'data_final',
             'fabitos': 'data_final',
             'workon': 'Termino',
             'greif': 'Data Encerramento',
@@ -470,6 +478,7 @@ class DataframeTreatment:
             'leroy': 'Fim', 'pluri': 'Fim'
         },
         'data_lancamento': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': None,
             'greif': None,
@@ -481,6 +490,7 @@ class DataframeTreatment:
             'leroy': None, 'pluri': None
         },
         'hora_inicio': {
+            'pergoletta': '=',
             'fabitos': '=',
             'workon': None,
             'greif': '=',
@@ -492,6 +502,7 @@ class DataframeTreatment:
             'leroy': 'Hora Inicial', 'pluri': 'Hora Inicial'
         },
         'hora_fim': {
+            'pergoletta': '=',
             'fabitos': '=',
             'workon': None,
             'greif': '=',
@@ -503,6 +514,7 @@ class DataframeTreatment:
             'leroy': 'Hora Final', 'pluri': 'Hora Final'
         },
         'nome_prestador': {
+            'pergoletta': 'medico',
             'fabitos': 'medico',
             'workon': 'Medico_Nome',
             'greif': 'Nome do Médico',
@@ -514,6 +526,7 @@ class DataframeTreatment:
             'leroy': 'Médico Solicitante', 'pluri': 'Médico Solicitante'
         },
         'identificador_prestador': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': 'Medico_Numero',
             'greif': 'Atestado Crm',
@@ -525,6 +538,7 @@ class DataframeTreatment:
             'leroy': 'Conselho de Classe', 'pluri': 'Conselho de Classe'
         },
         'estado_prestador': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': None,
             'greif': 'Estado',
@@ -536,6 +550,7 @@ class DataframeTreatment:
             'leroy': 'UF', 'pluri': 'UF'
         },
         'local': {
+            'pergoletta': 'local_do_exame',
             'fabitos': 'local_do_exame',
             'workon': 'LOCAL DE EMISSÃO',
             'greif': 'Empresa',
@@ -547,6 +562,7 @@ class DataframeTreatment:
             'leroy': 'Unidade', 'pluri': 'Unidade'
         },
         'tipo': {
+            'pergoletta': 'tipo_de_atestado',
             'fabitos': 'tipo_de_atestado',
             'workon': None,
             'greif': None,
@@ -558,6 +574,7 @@ class DataframeTreatment:
             'leroy': 'Tipo Licença', 'pluri': 'Tipo Licença'
         },
         'codigo_tipo': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': None,
             'greif': None,
@@ -569,6 +586,7 @@ class DataframeTreatment:
             'leroy': None, 'pluri': None
         },
         'tipo_prestador': {
+            'pergoletta': None,
             'fabitos': None,
             'workon': 'Medico_Tipo',
             'greif': None,
@@ -580,6 +598,7 @@ class DataframeTreatment:
             'leroy': None, 'pluri': None
         },
         # 'crm': {
+        # 'fabitos': None,    
         # 'fabitos': None,    
         # 'workon': 'Medico_Numero',
         #     'greif': 'Atestado Crm',

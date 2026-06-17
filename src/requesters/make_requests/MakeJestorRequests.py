@@ -57,7 +57,7 @@ class MakeJestorRequests:
             # list_size: int = 300,
             ) -> DataFrame | None:
         
-        if self.client_name == 'fabitos':
+        if self.client_name in ('fabitos', 'pergoletta'):
             df = self.table_get_request()
             if df is not None:
                 self.table_check_request(df['name'].copy().to_list())
@@ -69,7 +69,7 @@ class MakeJestorRequests:
                 'workon': 'afastamento@workongroup.com.br', 
                 'sulnorte': '', 
                 'ofy': '', 
-                'rip': ''
+                'rip': '',
             }
             
             self.sender_email = emails[self.client_name]
@@ -99,6 +99,13 @@ class MakeJestorRequests:
             DataFrame | None: _Dataframe com todos os registros da tabela necessários_
         """
         
+        client_ids_dict: dict = {
+            'fabitos': '220',
+            'pergoletta': '252'
+        }
+        
+        client_id: str = client_ids_dict[self.client_name]        
+        
         last_path = 'list'
         URL = f"https://expertocupacional.api.jestor.com/object/{last_path}"
 
@@ -109,9 +116,11 @@ class MakeJestorRequests:
             "filters": [
                     {"field": "fase","type":"list", "operator":"in", "value":"Aprovado"},
                     {"field": "ja_feita_a_coleta", "type":"boolean", "value":"0"},
+                    
+                    # {"field":"criado_em","type":"date","operator":"withinLastXDays","value":35},
 
                     # 220 == cod. da fabitos -> ter que fazer um dict p/ clientes da tabela
-                    {"field": "clientes_expert","type":"list", "operator": "in", "value":"220"}
+                    {"field": "clientes_expert", "type": "list", "operator": "in", "value": client_id}
             ],
             "token":"cc0da72ab3741491dec8f2daf2a95bba"
         }
@@ -130,9 +139,6 @@ class MakeJestorRequests:
         all_rows: list[dict] = data['items']
         df: DataFrame = pd.json_normalize(all_rows)
         
-        print(df.columns)        
-        print(df)
-        
         if df.empty:
             return None
 
@@ -146,14 +152,12 @@ class MakeJestorRequests:
             ids (Series[str]): _ids dos registros coletados da tabela_
         """
         
-        
         URL = 'https://expertocupacional.api.jestor.com/object/update'
 
         print(f'Número total de registros que foram coletados e que vão ser sinalizados como tal: {len(ids_list)}\n')
         
         for i, id in enumerate(ids_list):
             print('id: ', id)
-            
             
             AUTH_TOKEN = 'MTkxNDdmOTMzMzE4MzY16d87e0a03cMTczODYzMTI3MTg3ZGI5'
             HEADERS = {

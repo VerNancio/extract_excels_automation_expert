@@ -218,6 +218,17 @@ class RechSeleniumScrapying:
                 class_list = class_str.split()
 
                 if 'see-more' in class_list:
+                    
+                    # 1. Faz o iframe da Tracksale ignorar cliques e sumir da frente
+                    self.driver.execute_script("""
+                        var iframe = document.getElementById('tracksale-iframe');
+                        if (iframe) {
+                            iframe.style.pointerEvents = 'none';
+                            iframe.style.display = 'none';
+                            iframe.style.visibility = 'hidden';
+                        }
+                    """)
+                    
                     data_box_items[-2].click()
 
                 last_items_in_box_qnt = len(data_box_items)
