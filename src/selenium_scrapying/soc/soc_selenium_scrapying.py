@@ -102,8 +102,6 @@ class SocSeleniumScrapying:
         
         self.driver.get(url)
         
-        input('---------------------------------')
-        
         print(self.credentials)
 
         username_input: WebElement = self.driver.find_element(By.ID, 'usu')
@@ -119,11 +117,9 @@ class SocSeleniumScrapying:
         id_input: WebElement = self.driver.find_element(By.ID, 'empsoc')
         self.driver.execute_script(f"arguments[0].value = '{self.credentials['login_id']}';", id_input)
         
-        input('.......................................')
-        
         login_bttn = self.driver.find_element(By.ID, 'bt_entrar')
         login_bttn.click()
-        sleep(4)
+        sleep(3)
         
         # any_alerts_items: WebElement = self.driver.find_elements(By.CLASS_NAME, 'modalAlerta')
         # if len(any_alerts_items) > 0:

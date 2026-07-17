@@ -60,7 +60,8 @@ class MakeJestorRequests:
         if self.client_name in ('fabitos', 'pergoletta'):
             df = self.table_get_request()
             if df is not None:
-                self.table_check_request(df['name'].copy().to_list())
+                ...
+                # self.table_check_request(df['name'].copy().to_list())
             else:
                 return None
             
@@ -115,7 +116,7 @@ class MakeJestorRequests:
             "nested_type": "onlyrefs",
             "filters": [
                     {"field": "fase","type":"list", "operator":"in", "value":"Aprovado"},
-                    {"field": "ja_feita_a_coleta", "type":"boolean", "value":"0"},
+                    # {"field": "ja_feita_a_coleta", "type":"boolean", "value":"0"},
                     
                     # {"field":"criado_em","type":"date","operator":"withinLastXDays","value":35},
 
@@ -275,7 +276,6 @@ class MakeJestorRequests:
                 decrypted_file: io.BytesIO = self.decrypt_xlsx(file_pw=file_pw, content=response.content)
 
                 df: DataFrame = pd.read_excel(decrypted_file, engine="openpyxl")
-                # print(df)
 
                 file_path: str = os.path.join(self.download_temp_dir_path, f"{row_attachments_dict['name']} ... {row_send_date.replace('/', '-')}")
                 open(f'{file_path}.xlsx','wb').write(response.content)

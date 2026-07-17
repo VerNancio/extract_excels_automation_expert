@@ -1,5 +1,5 @@
 # Json contendo as credenciais
-creadentials.json
+credentials.json
 
 # Ambiente virtual
 venv/
@@ -8,13 +8,13 @@ venv/
 
 # Arquivos temporários do Python
 __pycache__/
-**.pyc
-**.pyo
-**.pyd
+**/*.pyc
+**/*.pyo
+**/*.pyd
 
 # Arquivos de dados que não precisam ir pro git
-**.xlsx
-**.xls
-*.json
-**.html
-**.zip
+**/*.xlsx
+**/*.xls
+**/*.json
+**/*.html
+**/*.zip

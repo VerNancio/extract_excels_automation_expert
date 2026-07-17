@@ -52,10 +52,18 @@ class HandleKWargs:
         return save_with_date_in_name
     
     
-    def handle_start_end_dates(self, necessary_default_filter_by: Literal['month', 'day']) -> tuple[str, str]:
+    def handle_start_end_dates(self, necessary_default_filter_by: Literal['month', 'day', 'range_days_ago'], since_days_ago: int = 180) -> tuple[str, str]:
+        """_Define valores default baseado no tipo de filtro necessário_
+
+        Args:
+            necessary_default_filter_by (Literal[&#39;month&#39;, &#39;day&#39;, &#39;range_days_ago&#39;]): _Tipo de janela de busca necessária ao filtrar_
+            since_days_ago (int, optional): _Quantidade de dias atrás dada uma data final. Default: 180._
+
+        Returns:
+            tuple[str, str]: _Retorna a data de início e fim_
+        """
         
         date_formatter = DateFormatter()
-        
         # Nos casos em que se quiser salvar o arquivo com uma data especifica correspondente a date_to_save
         
         if necessary_default_filter_by == 'month':
@@ -64,6 +72,10 @@ class HandleKWargs:
         elif necessary_default_filter_by == 'day':
             start_date: str = self.kwargs.get('start_date', date_formatter.last_working_day())
             end_date: str = self.kwargs.get('end_date', date_formatter.yesterday())
+        elif necessary_default_filter_by == 'range_days_ago':
+            start_date: str = self.kwargs.get('start_date', date_formatter.days_ago(days=since_days_ago))
+            end_date: str = self.kwargs.get('end_date', date_formatter.yesterday())
+            
         
         dt_f = date_formatter.get_curr_format()
         

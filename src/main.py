@@ -15,10 +15,11 @@ from .helpers.tools.compare_date_filter import CompareDateFilter
 
 from .requesters.filetypes_requests import FiletypesRequests
 from .helpers.treatment.dataframe_treatment import DataframeTreatment
-from .helpers.tools.store_excels import StoreSheets
+from .helpers.tools.store_data import StoreData
 
 from .requesters.make_requests.MakeCloseRequests import MakeCloseRequests
 from .requesters.make_requests.MakeJestorRequests import MakeJestorRequests
+from .requesters.make_requests.MakeSocRequests import MakeSocRequests
 
 from .selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapying
 from .selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
@@ -44,17 +45,17 @@ def main(**kwargs):
     
     if client_name in ['merck']:
         start_date, end_date = handler.handle_start_end_dates('month')
+    # elif client_name in ('leroy', 'pluri', 'viva'):
+        # start_date, end_date = handler.handle_start_end_dates('range_days_ago', since_days_ago=180)
     else:
         start_date, end_date = handler.handle_start_end_dates('day')
-    
-    print(start_date, end_date)
     
     # Se a data de inicio for maior que a da de fim de busca
     if date_formatter.to_datetime(start_date) > date_formatter.to_datetime(end_date):
         raise ValueError("Data de início de busca maior que a final")
         
-
-    print(f'Iniciando extração dos dados do client: {client_name.capitalize()}\n') 
+    print(f'Iniciando extração dos dados do client: "{client_name.capitalize()}"\n') 
+    
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         df: DataFrame = scraper.run()
@@ -77,29 +78,27 @@ def main(**kwargs):
         df = requester.run(row_post_date=date_to_filter)
 
     elif client_name in ('leroy', 'pluri', 'viva'):
-        scraper = SocSeleniumScrapying(client_name=client_name)
-        df: DataFrame = scraper.run(start_date=start_date, end_date=end_date)
+        # scraper = SocSeleniumScrapying(client_name=client_name)
+        requester = MakeSocRequests(client_name=client_name)
+        df: DataFrame = requester.request_data(start_date=start_date, end_date=end_date)
 
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
     if df is None or df.shape[0] == 0:
-        print("0 registros capitados, xlsx não criado...")
+        print("\n0 registros capitados, dados não foram salvos...")
         return
 
     # Faz o tratamento do df, retorna já pronto pra ser salvo
     df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
-    print(df_treated['cpf'])
+    # print(df_treated['cpf'])
     
     try: 
-
+        folder_name: str
         match client_name:
-            case 'copa':
-                folder_name = 'copaenergia'
-            case 'pluri':
-                folder_name = 'PLuriViva'
-            case _:
-                folder_name = client_name
+            case 'copa': folder_name = 'copaenergia'
+            case 'pluri': folder_name = 'PLuriViva'
+            case _: folder_name = client_name
 
-        storager = StoreSheets()
+        storager = StoreData()
         storager.storage_data(
             df=df_treated, 
             client_name=client_name,
@@ -109,6 +108,8 @@ def main(**kwargs):
             report_type=report_type,
             should_store_where=should_store_where
         )
+        
+        print(f'\nExtração finalizada com sucesso, {df_treated.shape[0]} registros salvos em: "{should_store_where}"')
             
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')

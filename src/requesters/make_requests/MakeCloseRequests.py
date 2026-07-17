@@ -12,8 +12,6 @@ from ...helpers.tools.get_credentials import get_credentials
 
 class MakeCloseRequests:
     
-
-    
     @staticmethod
     def get_bearer_token() -> str:
 

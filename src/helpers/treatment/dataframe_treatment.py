@@ -5,7 +5,6 @@ import regex as re
 
 from typing import Callable, Type
 
-
 class DataframeTreatment:
 
     # @staticmethod
@@ -25,8 +24,9 @@ class DataframeTreatment:
     
     @staticmethod
     def treat_df(df: DataFrame, client_name: str) -> DataFrame:
-
+        
         DT: Type[DataframeTreatment] = DataframeTreatment
+        print(df.columns)
 
         df_to_return: DataFrame = df
 
@@ -46,6 +46,8 @@ class DataframeTreatment:
         
         # Criação das colunas com dados vazios (pq a planilha básica não tem eles)
         renamed_columns: list[str] = df_to_return.columns.to_list()
+
+
 
         # Itera com os nomes padrões das colunas
         for default_c_name in default_column_names:
@@ -158,6 +160,8 @@ class DataframeTreatment:
     def add_return_date_column(df: DataFrame) -> DataFrame:
 
         default_null_date = pd.Timestamp("9999-12-31")
+        
+        print(df['data_inicio'])
 
         if 'data_inicio' not in df.columns:
             raise KeyError("A coluna 'data_inicio' não existe no DataFrame")
@@ -178,17 +182,14 @@ class DataframeTreatment:
             .str.extract(r'(\d+)')[0]
             .pipe(pd.to_numeric, errors='coerce')
         )
-        
+
         # Converte datas
-        df['data_inicio'] = pd.to_datetime(df['data_inicio'], format='%d/%m/%Y', errors='coerce')
+        df['data_inicio'] = pd.to_datetime(df['data_inicio'], dayfirst=True, errors='coerce')
         # df['data_inicio'] = df['data_inicio'].dt.strftime('%d/%m/%Y')
         
-        df['data_retorno'] = pd.to_datetime(df['data_retorno'], format='%d/%m/%Y', errors='coerce')
+        df['data_retorno'] = pd.to_datetime(df['data_retorno'], dayfirst=True, errors='coerce')
         # df['data_retorno'] = df['data_retorno'].dt.strftime('%d/%m/%Y')
         
-        
-        # df.to_excel('all.xlsx')
-
         # Máscara para calcular retorno
         mask_calculate = (
             df['data_retorno'].isna() &
@@ -381,232 +382,318 @@ class DataframeTreatment:
     }
 
     DEFAULT_COLUMNS_NAMES: dict[dict] = {
-        'cids': {
-            'pergoletta': 'cid_1',
-            'fabitos': 'cid_1',
-            'workon': 'CID10',
-            'greif': 'Código(s) CID',
-            'merck': '=',
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'CIDs Adicionais', 'pluri': 'CIDs Adicionais'
-        },
-        'cids_descricao': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': None,
-            'greif': None,
-            'merck': '=', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Descrição do Cid Adicional', 'pluri': 'Descrição do Cid Adicional'
-        },
-        'cpf': {
-            'pergoletta': 'cpf_1',
-            'fabitos': 'cpf_2',
-            'workon': 'CPF',
-            'greif': 'CPF do Funcionário',
-            'merck': 'CPF', 
-            'rech': 'CPF', 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'CPF', 'pluri': 'CPF'
-        },
-        'nome_funcionario': {
-            'pergoletta': 'nome_do_colaborador_1',
-            'fabitos': 'nome_do_colaborador_1',
-            'workon': 'Nome',
-            'greif': 'Funcionário',
-            'merck': 'Nome', 
-            'rech': 'Colaborador', 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Funcionário', 'pluri': 'Funcionário'
-        },
-        'matricula': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': 'Matricula RH',
-            'greif': 'Matrícula do Funcionário',
-            'merck': 'Matrícula', 
-            'rech': 'Cadastro', 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Matrícula', 'pluri': 'Matrícula'
-        },
-        'dias_afastamento': {
-            'pergoletta': 'duracao_do_atestado',
-            'fabitos': 'duracao_do_atestado',
-            'workon': None,
-            'greif': 'Quantidade de dias',
-            'merck': 'Dias Perdidos', 
-            'rech': 'Quantidade de Dias de Afastamento',
-            'coop': None,
-            'bimbo': None,
-            'copa': None,
-            'leroy': 'Dias Afastados', 'pluri': 'Dias Afastados'
-        },
-        'data_inicio': {
-            'pergoletta': 'data_inicial',
-            'fabitos': 'data_inicial',
-            'workon': 'Inicio',
-            'greif': 'Atestado Data Inicio',
-            'merck': 'Data Início', 
-            'rech': 'Data Inicial do afastamento', 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Início', 'pluri': 'Início'
-        },
-        'data_retorno': {
-            'pergoletta': 'data_final',
-            'fabitos': 'data_final',
-            'workon': 'Termino',
-            'greif': 'Data Encerramento',
-            'merck': 'Data Término', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Fim', 'pluri': 'Fim'
-        },
-        'data_lancamento': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': None,
-            'greif': None,
-            'merck': None, 
-            'rech': None, 
-            'coop': None,
-            'bimbo': None,
-            'copa': None,
-            'leroy': None, 'pluri': None
-        },
-        'hora_inicio': {
-            'pergoletta': '=',
-            'fabitos': '=',
-            'workon': None,
-            'greif': '=',
-            'merck': 'Hora Início', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Hora Inicial', 'pluri': 'Hora Inicial'
-        },
-        'hora_fim': {
-            'pergoletta': '=',
-            'fabitos': '=',
-            'workon': None,
-            'greif': '=',
-            'merck': 'Hora Término', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Hora Final', 'pluri': 'Hora Final'
-        },
-        'nome_prestador': {
-            'pergoletta': 'medico',
-            'fabitos': 'medico',
-            'workon': 'Medico_Nome',
-            'greif': 'Nome do Médico',
-            'merck': 'Responsável', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Médico Solicitante', 'pluri': 'Médico Solicitante'
-        },
-        'identificador_prestador': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': 'Medico_Numero',
-            'greif': 'Atestado Crm',
-            'merck': 'Registro', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Conselho de Classe', 'pluri': 'Conselho de Classe'
-        },
-        'estado_prestador': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': None,
-            'greif': 'Estado',
-            'merck': 'Regional', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'UF', 'pluri': 'UF'
-        },
-        'local': {
-            'pergoletta': 'local_do_exame',
-            'fabitos': 'local_do_exame',
-            'workon': 'LOCAL DE EMISSÃO',
-            'greif': 'Empresa',
-            'merck': 'Unidade', 
-            'rech': 'Filial', 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Unidade', 'pluri': 'Unidade'
-        },
-        'tipo': {
-            'pergoletta': 'tipo_de_atestado',
-            'fabitos': 'tipo_de_atestado',
-            'workon': None,
-            'greif': None,
-            'merck': None, 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': 'Tipo Licença', 'pluri': 'Tipo Licença'
-        },
-        'codigo_tipo': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': None,
-            'greif': None,
-            'merck': None, 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': None, 'pluri': None
-        },
-        'tipo_prestador': {
-            'pergoletta': None,
-            'fabitos': None,
-            'workon': 'Medico_Tipo',
-            'greif': None,
-            'merck': 'Conselho', 
-            'rech': None, 
-            'coop': '=',
-            'bimbo': '=',
-            'copa': '=',
-            'leroy': None, 'pluri': None
-        },
-        # 'crm': {
-        # 'fabitos': None,    
-        # 'fabitos': None,    
-        # 'workon': 'Medico_Numero',
-        #     'greif': 'Atestado Crm',
-        #     'merck': 'Registro', 
-        #     'rech': None, 
-        #     'coop': None,
-        #     'bimbo': None,
-        #     'copa': None,
-        #     'leroy': None, 'pluri': None
-        # }
-    }
+    'cids': {
+        'pergoletta': 'cid_1',
+        'fabitos': 'cid_1',
+        'workon': 'CID10',
+        'greif': 'Código(s) CID',
+        'merck': 'CID',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'CIDs Adicionais',
+        # 'pluri': 'CIDs Adicionais',
+        # 'viva': 'CIDs Adicionais',
+        'leroy': 'CID',
+        'pluri': 'CID',
+        'viva': 'CID',
+    },
+
+    'cids_descricao': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': None,
+        'greif': None,
+        'merck': '=',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Descrição do Cid Adicional',
+        # 'pluri': 'Descrição do Cid Adicional',
+        # 'viva': 'Descrição do Cid Adicional',
+        'leroy': None,
+        'pluri': None,
+        'viva': None,
+    },
+
+    'cpf': {
+        'pergoletta': 'cpf_1',
+        'fabitos': 'cpf_2',
+        'workon': 'CPF',
+        'greif': 'CPF do Funcionário',
+        'merck': 'CPF',
+        'rech': 'CPF',
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        'leroy': 'CPF',
+        'pluri': 'CPF',
+        'viva': 'CPF',
+    },
+
+    'nome_funcionario': {
+        'pergoletta': 'nome_do_colaborador_1',
+        'fabitos': 'nome_do_colaborador_1',
+        'workon': 'Nome',
+        'greif': 'Funcionário',
+        'merck': 'Nome',
+        'rech': 'Colaborador',
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Funcionário',
+        # 'pluri': 'Funcionário',
+        # 'viva': 'Funcionário',
+        'leroy': '=',
+        'pluri': '=',
+        'viva': '=',
+    },
+
+    'matricula': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': 'Matricula RH',
+        'greif': 'Matrícula do Funcionário',
+        'merck': 'Matrícula',
+        'rech': 'Cadastro',
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Matrícula',
+        # 'pluri': 'Matrícula',
+        # 'viva': 'Matrícula',
+        'leroy': 'CODIGOFUNCIONARIO',
+        'pluri': 'CODIGOFUNCIONARIO',
+        'viva': 'CODIGOFUNCIONARIO',
+    },
+
+    'dias_afastamento': {
+        'pergoletta': 'duracao_do_atestado',
+        'fabitos': 'duracao_do_atestado',
+        'workon': None,
+        'greif': 'Quantidade de dias',
+        'merck': 'Dias Perdidos',
+        'rech': 'Quantidade de Dias de Afastamento',
+        'coop': None,
+        'bimbo': None,
+        'copa': None,
+        # 'leroy': 'Dias Afastados',
+        # 'pluri': 'Dias Afastados',
+        # 'viva': 'Dias Afastados',
+        'leroy': 'DIASAFASTADOS',
+        'pluri': 'DIASAFASTADOS',
+        'viva': 'DIASAFASTADOS',
+    },
+
+    'data_inicio': {
+        'pergoletta': 'data_inicial',
+        'fabitos': 'data_inicial',
+        'workon': 'Inicio',
+        'greif': 'Atestado Data Inicio',
+        'merck': 'Data Início',
+        'rech': 'Data Inicial do afastamento',
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Início',
+        # 'pluri': 'Início',
+        # 'viva': 'Início',
+        'leroy': 'INICIO',
+        'pluri': 'INICIO',
+        'viva': 'INICIO',
+    },
+
+    'data_retorno': {
+        'pergoletta': 'data_final',
+        'fabitos': 'Data Término',
+        'workon': 'Termino',
+        'greif': 'Data Encerramento',
+        'merck': 'Data Término',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Fim',
+        # 'pluri': 'Fim',
+        # 'viva': 'Fim',
+        'leroy': 'RETORNO',
+        'pluri': 'RETORNO',
+        'viva': 'RETORNO',
+    },
+
+    'data_lancamento': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': None,
+        'greif': None,
+        'merck': None,
+        'rech': None,
+        'coop': None,
+        'bimbo': None,
+        'copa': None,
+        # 'leroy': None,
+        # 'pluri': None,
+        # 'viva': None,
+        'leroy': 'DATADECRIACAO',
+        'pluri': 'DATADECRIACAO',
+        'viva': 'DATADECRIACAO',
+    },
+
+    'hora_inicio': {
+        'pergoletta': '=',
+        'fabitos': '=',
+        'workon': None,
+        'greif': '=',
+        'merck': 'Hora Início',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Hora Inicial',
+        # 'pluri': 'Hora Inicial',
+        # 'viva': 'Hora Inicial',
+        'leroy': 'HORAINICIAL',
+        'pluri': 'HORAINICIAL',
+        'viva': 'HORAINICIAL',
+    },
+
+    'hora_fim': {
+        'pergoletta': '=',
+        'fabitos': '=',
+        'workon': None,
+        'greif': '=',
+        'merck': 'Hora Término',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Hora Final',
+        # 'pluri': 'Hora Final',
+        # 'viva': 'Hora Final',
+        'leroy': 'HORAFINAL',
+        'pluri': 'HORAFINAL',
+        'viva': 'HORAFINAL',
+    },
+
+    'nome_prestador': {
+        'pergoletta': 'medico',
+        'fabitos': 'medico',
+        'workon': 'Medico_Nome',
+        'greif': 'Nome do Médico',
+        'merck': 'Responsável',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Médico Solicitante',
+        # 'pluri': 'Médico Solicitante',
+        # 'viva': 'Médico Solicitante',
+        'leroy': 'MEDICO',
+        'pluri': 'MEDICO',
+        'viva': 'MEDICO',
+    },
+
+    'identificador_prestador': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': 'Medico_Numero',
+        'greif': 'Atestado Crm',
+        'merck': 'Registro',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Conselho de Classe',
+        # 'pluri': 'Conselho de Classe',
+        # 'viva': 'Conselho de Classe',
+        'leroy': 'CONSELHODECLASSE',
+        'pluri': 'CONSELHODECLASSE',
+        'viva': 'CONSELHODECLASSE',
+    },
+
+    'estado_prestador': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': None,
+        'greif': 'Estado',
+        'merck': 'Regional',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'UF',
+        # 'pluri': 'UF',
+        # 'viva': 'UF',
+        'leroy': 'ESTADO',
+        'pluri': 'ESTADO',
+        'viva': 'ESTADO',
+    },
+
+    'local': {
+        'pergoletta': 'local_do_exame',
+        'fabitos': 'local_do_exame',
+        'workon': 'LOCAL DE EMISSÃO',
+        'greif': 'Empresa',
+        'merck': 'Unidade',
+        'rech': 'Filial',
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Unidade',
+        # 'pluri': 'Unidade',
+        # 'viva': 'Unidade',
+        'leroy': 'LOCAL',
+        'pluri': 'LOCAL',
+        'viva': 'LOCAL',
+    },
+
+    'tipo': {
+        'pergoletta': 'tipo_de_atestado',
+        'fabitos': 'tipo_de_atestado',
+        'workon': None,
+        'greif': None,
+        'merck': None,
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        # 'leroy': 'Tipo Licença',
+        # 'pluri': 'Tipo Licença',
+        # 'viva': 'Tipo Licença',
+        'leroy': 'TIPOLICENCA',
+        'pluri': 'TIPOLICENCA',
+        'viva': 'TIPOLICENCA',
+    },
+
+    'codigo_tipo': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': None,
+        'greif': None,
+        'merck': None,
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        'leroy': None,
+        'pluri': None,
+        'viva': None,
+    },
+
+    'tipo_prestador': {
+        'pergoletta': None,
+        'fabitos': None,
+        'workon': 'Medico_Tipo',
+        'greif': None,
+        'merck': 'Conselho',
+        'rech': None,
+        'coop': '=',
+        'bimbo': '=',
+        'copa': '=',
+        'leroy': None,
+        'pluri': None,
+        'viva': None,
+    },
+}
