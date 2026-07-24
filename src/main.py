@@ -3,11 +3,6 @@ import datetime as dt
 
 import pandas as pd; from pandas import DataFrame;
 
-
-from .constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
-# from .requesters.make_requests.MakeRequests import CLIENTS_NAMES_LIST
-
-
 from .helpers.tools.handle_kwargs import HandleKWargs
 
 from .helpers.tools.date_formatter import DateFormatter
@@ -25,6 +20,9 @@ from .selenium_scrapying.rech.rech_selenium_scrapying import RechSeleniumScrapyi
 from .selenium_scrapying.greif.greif_selenium_scrapying import GreifSeleniumScrapying
 from .selenium_scrapying.merck.merck_selenium_scrapying import MerckSeleniumScrapying
 from .selenium_scrapying.soc.soc_selenium_scrapying import SocSeleniumScrapying
+
+from src.helpers.tools.get_credentials import get_credentials
+from src.constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 
 
 def main(**kwargs):
@@ -89,27 +87,36 @@ def main(**kwargs):
 
     # Faz o tratamento do df, retorna já pronto pra ser salvo
     df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
-    # print(df_treated['cpf'])
+    total_extracted_rows = len(df_treated)
+    
+    print(f'Extração finalizada com sucesso. Total de registros extraídos: {total_extracted_rows}')
     
     try: 
         folder_name: str
         match client_name:
             case 'copa': folder_name = 'copaenergia'
-            case 'pluri': folder_name = 'PLuriViva'
             case _: folder_name = client_name
 
+        auth_token: str | None = None
+        if should_store_where == 'jestor':
+            auth_token: str = get_credentials('jestor')['auth_token']
+
         storager = StoreData()
-        storager.storage_data(
+        rows_saved: int = storager.storage_data(
             df=df_treated, 
             client_name=client_name,
             folder_name=folder_name,
             date=date_to_save, 
             date_in_name=save_with_date_in_name, 
             report_type=report_type,
-            should_store_where=should_store_where
+            should_store_where=should_store_where,
+            auth_token=auth_token
         )
         
-        print(f'\nExtração finalizada com sucesso, {df_treated.shape[0]} registros salvos em: "{should_store_where}"')
+        if rows_saved > 0:
+            print(f'Total de {rows_saved} registros salvos com sucesso em: "{should_store_where}"')
+        else:
+            print(f'Nenhum registro foi salvo em: "{should_store_where}"')
             
     except PermissionError as e:
         print(f'Arquivo excel aberto, por favor faça a exclusão pra poder salvar o novo: {e}')

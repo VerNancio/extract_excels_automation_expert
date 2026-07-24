@@ -1,3 +1,5 @@
+import os
+
 CLIENTS_NAMES_LIST = [
     'leroy', 'pluri', 'viva', 
     'coop', 'copa', 'bimbo', 
@@ -5,6 +7,8 @@ CLIENTS_NAMES_LIST = [
     'workon', 'sulnorte', 'rip', 'ofy', 
     'fabitos', 'pergoletta'
 ]
+
+JESTOR_BASE_URL = 'https://expertocupacional.api.jestor.com'
 
 CLIENT_IDS_JESTOR = {
     'leroy': '45',
@@ -25,6 +29,9 @@ CLIENT_IDS_JESTOR = {
 }
 
 STORAGE_PLACES_XLSX = ['local', 'onedrive', 'both', 'jestor']
+
+# Caminho de salvamento do Onedrive
+# ONEDRIVE_PATH = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
 
 # tabela teste 
 JESTOR_ABSENTEISM_TABLE_HASH = '86qoi45nmae4by9k46ftm'

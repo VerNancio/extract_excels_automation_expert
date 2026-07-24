@@ -211,11 +211,6 @@ class SocSeleniumScrapying:
         self.driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", relatory_row)
         sleep(60)
         
-        # relatory_link: WebElement = relatory_row.find_element(By.XPATH, '//td[@class="center-align"]')
-        # WebDriverWait(self.driver, 10).until(
-        #     EC.visibility_of_element_located((By.XPATH, '//td[@class="center-align"]'))
-        # )
-        
         relatory_process_status_elmnt: WebElement = relatory_row.find_element(By.CLASS_NAME, 'situacao')
         download_clickable = relatory_process_status_elmnt.find_element(By.XPATH, '//a[@data-programa-download="pr043"]')
         self.driver.execute_script("arguments[0].click();", download_clickable)
@@ -227,7 +222,6 @@ class SocSeleniumScrapying:
         # window_position = self.driver.get_window_position()
         # window_x = window_position['x']
         # window_y = window_position['y']
-        # print(size)
 
         # # coordenadas absolutas na tela
         # screen_x = window_x + location['x'] + size['width']/2

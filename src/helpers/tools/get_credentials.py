@@ -1,5 +1,6 @@
 import json
 
+
 def get_credentials(reference_name: str) -> dict:
     """
     Retorna dicionárizado as credenciais de login corresponte ao sistema de acesso do cliente informado

@@ -12,6 +12,8 @@ from typing import Any
 
 from ...helpers.tools.get_credentials import get_credentials
 
+from src.constants import JESTOR_BASE_URL
+
 
 
 class MakeJestorRequests:
@@ -68,9 +70,9 @@ class MakeJestorRequests:
         else:
             emails: dict[str, str] = {
                 'workon': 'afastamento@workongroup.com.br', 
-                'sulnorte': '', 
-                'ofy': '', 
-                'rip': '',
+                # 'sulnorte': '', 
+                # 'ofy': '', 
+                # 'rip': '',
             }
             
             self.sender_email = emails[self.client_name]
@@ -108,7 +110,7 @@ class MakeJestorRequests:
         client_id: str = client_ids_dict[self.client_name]        
         
         last_path = 'list'
-        URL = f"https://expertocupacional.api.jestor.com/object/{last_path}"
+        URL = f"{JESTOR_BASE_URL}/object/{last_path}"
 
         payload = {
             "object_type":"e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik",
@@ -153,20 +155,19 @@ class MakeJestorRequests:
             ids (Series[str]): _ids dos registros coletados da tabela_
         """
         
-        URL = 'https://expertocupacional.api.jestor.com/object/update'
+        URL = f"{JESTOR_BASE_URL}/object/update"
+        
+        HEADERS = {
+            "Authorization": f"Bearer {self.AUTH_TOKEN}",
+            "accept": "application/json",
+            "content-type": "application/json"
+        }
 
         print(f'Número total de registros que foram coletados e que vão ser sinalizados como tal: {len(ids_list)}\n')
         
         for i, id in enumerate(ids_list):
-            print('id: ', id)
             
-            AUTH_TOKEN = 'MTkxNDdmOTMzMzE4MzY16d87e0a03cMTczODYzMTI3MTg3ZGI5'
-            HEADERS = {
-                    "Authorization": f"Bearer {AUTH_TOKEN}",
-                    "accept": "application/json",
-                    "content-type": "application/json"
-            }
-            PAYLOAD = {
+            payload = {
                 "object_type": 'e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik',
                 "data": {
                     f'id_e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik': id,
@@ -174,8 +175,8 @@ class MakeJestorRequests:
                 },
             }
 
-            res = req.post(URL, headers=HEADERS, json=PAYLOAD)
-            res_json = res.json()
+            res = req.post(URL, headers=HEADERS, json=payload)
+            # res_json = res.json()
         
             print(f'Realizado update Nº{i + 1} do registro de ID {id}')
             
@@ -207,7 +208,7 @@ class MakeJestorRequests:
     def download_and_save_xlsx_file(self) -> DataFrame | None:
         
         last_path = 'list'
-        URL = f"https://expertocupacional.api.jestor.com/object/{last_path}"
+        URL = f"{JESTOR_BASE_URL}/object/{last_path}"
 
         filters = [
             {"field":"email_solicitante", "type":"string", "operator":"Exatamente igual", "value": self.sender_email},
@@ -265,9 +266,8 @@ class MakeJestorRequests:
             if row_send_date != self.row_post_date:
                 continue
 
-            print(row['data_de_criacao'])
             xlsx_url_path: str = row_attachments_dict['file']
-            download_xlsx_url = f'https://files.jestor.com/expertocupacional/{xlsx_url_path}'
+            download_xlsx_url = f'{JESTOR_BASE_URL}/files/expertocupacional/{xlsx_url_path}'
 
             response: Response = req.get(download_xlsx_url, allow_redirects=True)
 

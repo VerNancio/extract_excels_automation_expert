@@ -1,7 +1,3 @@
-# import os
-# from urllib.request import urlretrieve
-# from time import sleep
-# import shutil
 import datetime as dt
 import time
 from threading import Thread
@@ -11,7 +7,13 @@ from pandas import DataFrame
 from io import StringIO
 from time import sleep
 from typing import Literal
+
+import traceback
+
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -19,9 +21,9 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+
 from ...helpers.tools.date_formatter import DateFormatter
 from ...helpers.tools.get_credentials import get_credentials
-import traceback
 
 class MerckSeleniumScrapying:
     
@@ -32,8 +34,19 @@ class MerckSeleniumScrapying:
     report_type: Literal['hour', 'date']
 
     def __init__(self, report_type: Literal['hour', 'date']):
+        
+        options = Options()
+        
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        
+        # service = Service('/usr/bin/chromedriver') # para rodar no container sem BO
+        service = Service() # para rodar no container sem BO
+        
         # Inicia o acesso ao navegador
-        self.driver = webdriver.Chrome()
+        # self.driver = webdriver.Chrome(options=options)
+        self.driver = webdriver.Chrome(options=options, service=service)
         self.credentials = get_credentials('merck')
         if report_type in ('hour', 'date'):
             self.report_type = report_type
@@ -50,7 +63,7 @@ class MerckSeleniumScrapying:
         
         except Exception as e:
             print(f"Ocorreu um erro: {e}, {e}")
-            while 1:...
+            # while 1:...
             # raise e
         finally:
             self.driver.quit()
@@ -94,7 +107,6 @@ class MerckSeleniumScrapying:
         # Redireciona pra página com todos os registros em html
         if self.report_type == 'date':
             url = f'https://www.rhmed.com.br/evidamed/web/relatorio/LicencaMedica/LMPorData/index.asp?datInicial={start_date_iso}&datTermino={end_date_iso}&formato=html&action=consultar'
-            print(url)
             
         elif self.report_type == 'hour':
             url = f'https://www.rhmed.com.br/evidamed/web/Relatorio/LicencaMedica/LMporHora/index.asp?datInicial={start_date_iso}&datTermino={end_date_iso}&tipoPesquisaFuncionario=1&funcionario=&formato=html&action=consultar'

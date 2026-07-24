@@ -21,7 +21,7 @@ if __name__ == '__main__':
                     "--date_to_save:<hoje/ontem/ultimo_dia_util/ultimo_dia_ultimo_mes>\n" \
                     "--start_date:<data pra filtrar: dd/mm/YYYY>\n" \
                     "--end_date:<data pra filtrar: dd/mm/YYYY>\n" \
-                    "--should_store_where:<local/onedrive/both>\n" \
+                    "--should_store_where:<local/onedrive/jestor/both>\n" \
                     "--report_type:<'hour'/'date'>\n" 
 
     kwargs = sys.argv[1:]

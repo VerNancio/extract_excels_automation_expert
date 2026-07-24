@@ -26,7 +26,6 @@ class DataframeTreatment:
     def treat_df(df: DataFrame, client_name: str) -> DataFrame:
         
         DT: Type[DataframeTreatment] = DataframeTreatment
-        print(df.columns)
 
         df_to_return: DataFrame = df
 
@@ -161,8 +160,6 @@ class DataframeTreatment:
 
         default_null_date = pd.Timestamp("9999-12-31")
         
-        print(df['data_inicio'])
-
         if 'data_inicio' not in df.columns:
             raise KeyError("A coluna 'data_inicio' não existe no DataFrame")
         

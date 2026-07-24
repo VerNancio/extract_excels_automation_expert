@@ -356,7 +356,6 @@ class GreifSeleniumScrapying:
             # func_df['Atestado Data Inicio'] = pd.to_datetime(df['Atestado Data Inicio']).dt.floor('D')
 
 
-
             func_df['Quantidade de dias'] = (
                 func_df['Quantidade de dias']
                 .fillna('')            # substitui NaN
@@ -365,8 +364,6 @@ class GreifSeleniumScrapying:
                 .str.split(' ').str[0] # pega só a primeira parte
             )
 
-            print(df)
-            
             # df[['Data Encerramento', 'hora_fim']] = df['Data Encerramento'].str.strip().str.split(' ', n=1, expand=True)
             # df['Data Encerramento'] = df['Data Abertura'] + pd.to_timedelta(func_df['Quantidade de dias'], unit='D') \
             #                           if ['Data Encerramento'] is None else df['Data Encerramento']

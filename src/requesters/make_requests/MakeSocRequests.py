@@ -23,8 +23,6 @@ class MakeSocRequests:
         start_date_dt = date_formatter.to_datetime(start_date)
         end_date_dt = date_formatter.to_datetime(end_date)
         
-        # print(df.columns)
-        
         filtered_df = df[
                 (pd.to_datetime(df['DATADECRIACAO'], format='%d/%m/%Y') >= start_date_dt) & 
                 (pd.to_datetime(df['DATADECRIACAO'], format='%d/%m/%Y') <= end_date_dt)

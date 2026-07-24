@@ -15,19 +15,30 @@ class HandleKWargs:
     
     def handle_non_existents_clients(self) -> str:
         client_name = self.kwargs.get('client_name')
+        
+        clients = "\n".join(
+            f"{index + 1}. {client}"
+            for index, client in enumerate(CLIENTS_NAMES_LIST)
+        )
+        
         if client_name not in CLIENTS_NAMES_LIST:
             raise ValueError(f"KWarg do nome do cliente não possuí valor válido: '{client_name}'\n\n" + \
-                            f"Empresas disponíveis:\n{'\n'.join([f'{index + 1}. {client}' for index, client in enumerate(CLIENTS_NAMES_LIST)])}")
-
+                            f"Empresas disponíveis:\n{clients}")
         return client_name
 
 
     def handle_non_existents_storage_places(self) -> str:
         # Espera valores como 'local', 'onedrive', 'both', para referência de onde deve ser salvo
         should_store_where = self.kwargs.get('should_store_where', 'local')
+        
+        storage_places = "\n".join(
+            f"{index + 1}. {client}"
+            for index, client in enumerate(STORAGE_PLACES_XLSX)
+        )
+        
         if should_store_where not in STORAGE_PLACES_XLSX:
             raise ValueError(f"KWarg do lugar onde o arquivo deve ser armazenado não possuí valor válido: {should_store_where}\n\n" + \
-                            f"Empresas disponíveis:\n{'\n'.join([f'{index + 1}. {PLACE}' for index, PLACE in enumerate(STORAGE_PLACES_XLSX)])}")
+                            f"Empresas disponíveis:\n{storage_places}")
 
         return should_store_where
     

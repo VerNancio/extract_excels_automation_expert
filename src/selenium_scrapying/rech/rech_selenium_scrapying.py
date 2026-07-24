@@ -341,22 +341,22 @@ class RechSeleniumScrapying:
         apply_filters_bttn = self.driver.find_element(By.ID, 's-button-3')
         self.driver.execute_script("arguments[0].click();", apply_filters_bttn)
         
-        
-    def read_modelo_1(self) -> DataFrame:
-        """_Retorna um Dataframe com todas as modelos 1 da Rech concatenadas_
+    # Comentado pois usa o os.environ e tá dando bo no docker
+    # def read_modelo_1(self) -> DataFrame:
+    #     """_Retorna um Dataframe com todas as modelos 1 da Rech concatenadas_
 
-        Returns:
-            DataFrame: _Dataframe com todas as modelo 1 da Rech concatenadas_
-        """
+    #     Returns:
+    #         DataFrame: _Dataframe com todas as modelo 1 da Rech concatenadas_
+    #     """
         
-        sharepoint_path: str = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
-        dir_path: str = os.path.join(sharepoint_path, 'Modelo I - Clientes com SOC', 'Grupo Rech')
-        filenames: list[str] = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+    #     sharepoint_path: str = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
+    #     dir_path: str = os.path.join(sharepoint_path, 'Modelo I - Clientes com SOC', 'Grupo Rech')
+    #     filenames: list[str] = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
         
-        modelo_1_all_dfs: list[DataFrame] = [pd.read_excel(os.path.join(dir_path, f), skiprows=1) for f in filenames]
-        modelo_1_df: DataFrame = pd.concat(modelo_1_all_dfs, ignore_index=True)
+    #     modelo_1_all_dfs: list[DataFrame] = [pd.read_excel(os.path.join(dir_path, f), skiprows=1) for f in filenames]
+    #     modelo_1_df: DataFrame = pd.concat(modelo_1_all_dfs, ignore_index=True)
         
-        return modelo_1_df
+    #     return modelo_1_df
     
     
     def merge_df_with_modelo_1(self, df: DataFrame, modelo_1_df: DataFrame) -> DataFrame:
