@@ -320,7 +320,6 @@ class StoreData:
         # ENVIO DOS REGISTROS
         # ======================================================
         
-        df_treated = df_treated[:4]
         print(df_treated)
         
         total_rows_created = 0
