@@ -25,6 +25,7 @@ class GreifSeleniumScrapying:
     menu_window_handler: str
     # filters: list[str] = ['Pendente', 'Responsável Redirecionado']  # nao funcional e provavelmente errado
     filters: list[str] = ['Pendente']
+    any_scraping_error: bool = False
     
 
     def __init__(self):
@@ -52,8 +53,8 @@ class GreifSeleniumScrapying:
 
     def run(self, date_to_filter: str | None) -> DataFrame | None:
 
-        # try:
-        if 1:
+        try:
+        # if 1:
             self.do_login()
             self.go_to_menu()
 
@@ -74,12 +75,18 @@ class GreifSeleniumScrapying:
 
             return df
 
-        # except Exception as e:
-            # print(f"Ocorreu um erro: {e}")
+        except Exception as e:
+            print(f"Ocorreu um erro: {e}")
+            self.any_scraping_error = True
 
-        # finally:
+        finally:
             self.driver.quit()
             print("Navegador fechado.")
+
+
+    def some_scraping_error_occurred(self) -> bool:
+            """Informa se algum erro ocorreu durante o scraping"""
+            return self.any_scraping_error 
 
 
     def do_login(self) -> None:

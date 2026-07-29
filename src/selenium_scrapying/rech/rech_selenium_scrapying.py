@@ -23,13 +23,13 @@ class RechSeleniumScrapying:
 
     driver: WebDriver
     credentials: dict
+    any_scraping_error: bool = False
 
 
     def __init__(self):
         # Inicia o acesso ao navegador
         self.driver = webdriver.Chrome()
         self.credentials = get_credentials('rech')
-
 
         
     def run(self) -> DataFrame | None:
@@ -57,11 +57,17 @@ class RechSeleniumScrapying:
             traceback.print_exc()
             
             print(f"Ocorreu um erro: {e.with_traceback(e.__traceback__)}")
+            self.any_scraping_error = True
 
         finally:
             self.driver.quit()
             print("Navegador fechado.")
 
+
+    def some_scraping_error_occurred(self) -> bool:
+        """Informa se algum erro ocorreu durante o scraping"""
+        return self.any_scraping_error 
+        
 
     def do_login(self) -> None:
 

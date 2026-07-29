@@ -32,6 +32,7 @@ class MerckSeleniumScrapying:
     pw: str
     credentials: dict
     report_type: Literal['hour', 'date']
+    any_scraping_error: bool = False
 
     def __init__(self, report_type: Literal['hour', 'date']):
         
@@ -46,7 +47,7 @@ class MerckSeleniumScrapying:
         
         # Inicia o acesso ao navegador
         # self.driver = webdriver.Chrome(options=options)
-        self.driver = webdriver.Chrome(options=options, service=service)
+        self.driver = webdriver.Chrome(options=options, service=service, keep_alive=1)
         self.credentials = get_credentials('merck')
         if report_type in ('hour', 'date'):
             self.report_type = report_type
@@ -63,12 +64,17 @@ class MerckSeleniumScrapying:
         
         except Exception as e:
             print(f"Ocorreu um erro: {e}, {e}")
-            # while 1:...
+            self.any_scraping_error = True
             # raise e
         finally:
             self.driver.quit()
             print("Navegador fechado.")
             traceback.print_exc()
+
+
+    def some_scraping_error_occurred(self) -> bool:
+        """Informa se algum erro ocorreu durante o scraping"""
+        return self.any_scraping_error 
 
 
     def do_login(self) -> None:
@@ -80,10 +86,9 @@ class MerckSeleniumScrapying:
         document.querySelector('input[name="password"]').value = arguments[1];
         document.querySelector('button[type="submit"]').click();
         """
-        self.driver.find_element(By.XPATH, "//input[@id='usuario']").send_keys("l.fsilva")
-        self.driver.find_element(By.XPATH, "//input[@id='senha']").send_keys("LaraBeatriz010203.")
+        self.driver.find_element(By.XPATH, "//input[@id='usuario']").send_keys(self.credentials['username'])
+        self.driver.find_element(By.XPATH, "//input[@id='senha']").send_keys(self.credentials['pw'])
         self.driver.find_element(By.XPATH, "//button[normalize-space()='Entrar']").click()
-        ##self.driver.execute_script(script, self.credentials['username'], self.credentials['pw'])
         time.sleep(0.5)
 
 

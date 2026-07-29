@@ -25,7 +25,10 @@ from src.helpers.tools.get_credentials import get_credentials
 from src.constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 
 
-def main(**kwargs):
+def main(**kwargs) -> bool:
+    
+    # Por padrão começa False
+    exec_succeded: bool = True    
 
     handler = HandleKWargs(kwargs)
 
@@ -33,8 +36,6 @@ def main(**kwargs):
     should_store_where: str = handler.handle_non_existents_storage_places()
     report_type: str = handler.handle_non_existents_report_types()
     save_with_date_in_name: bool = handler.handle_non_existents_report_types()
-    
-    # date_to_filter: str = kwargs.get('date_to_filter', date_formatter.last_working_day())
     
     date_to_save: str = handler.handle_date_to_save()
     date_to_filter: str = handler.handle_date_to_filter()
@@ -53,20 +54,25 @@ def main(**kwargs):
         raise ValueError("Data de início de busca maior que a final")
         
     print(f'Iniciando extração dos dados do client: "{client_name.capitalize()}"\n') 
-    
+
+ 
+    any_scraping_error: bool
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         df: DataFrame = scraper.run()
+        any_scraping_error = scraper.some_scraping_error_occurred()
 
     elif client_name == 'greif':
         scraper = GreifSeleniumScrapying()
         df: DataFrame = scraper.run(date_to_filter=date_to_filter)
+        any_scraping_error = scraper.some_scraping_error_occurred()
 
     elif client_name == 'merck':    
         scraper = MerckSeleniumScrapying(report_type=report_type)
 
         # Nao é necessario indicar a data porque pega do mes passado inteiro automaticamente
         df: DataFrame = scraper.run(start_date=start_date, end_date=end_date)
+        any_scraping_error = scraper.some_scraping_error_occurred()
 
     elif client_name in ('coop', 'copa', 'bimbo'):
         df: DataFrame = MakeCloseRequests.request_data(client_name=client_name, start_date=start_date, end_date=end_date)
@@ -123,3 +129,9 @@ def main(**kwargs):
     
     except Exception as e:
         print(f'Erro: {e}')
+        exec_succeded = False
+        
+    if any_scraping_error:
+        exec_succeded = False
+    
+    return exec_succeded

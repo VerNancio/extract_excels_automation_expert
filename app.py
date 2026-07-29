@@ -1,8 +1,11 @@
 import time
-import uvicorn
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
+
+from pydantic import BaseModel, Field, ConfigDict
+
+import uvicorn
+from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import JSONResponse
 
 # Importando a função main do seu pacote
 from src.main import main
@@ -64,7 +67,7 @@ def execute_report(request: ExecutionRequest):
 
     try:
         # Executa a função passando o dicionário desempacotado
-        main(**kwargs)
+        exec_succeded: bool = main(**kwargs)
     except Exception as e:
         # Se a main() der erro, a API retorna status 500 informando o que falhou
         raise HTTPException(status_code=500, detail=f"Erro interno na execução: {str(e)}")
@@ -72,12 +75,25 @@ def execute_report(request: ExecutionRequest):
     end_time = time.time()
     execution_time = round(end_time - start_time, 2)
 
-    return {
-        "message": "Execução finalizada com sucesso.",
-        "execution_time_seconds": execution_time,
-        "parameters_used": kwargs
-    }
-    
+    if not exec_succeded:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "message": "Execução falhou internamente.",
+                "execution_time_seconds": execution_time,
+                "parameters_used": kwargs
+            }
+        )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "message": "Execução finalizada com sucesso.",
+            "execution_time_seconds": execution_time,
+            "parameters_used": kwargs
+        }
+    )
+        
     
 # --- BLOCO ADICIONADO PARA RODAR O SERVIDOR ---
 if __name__ == "__main__":
