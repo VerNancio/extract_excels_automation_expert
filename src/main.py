@@ -25,7 +25,7 @@ from src.helpers.tools.get_credentials import get_credentials
 from src.constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 
 
-def main(**kwargs) -> tuple[int, bool] | False:
+def main(**kwargs) -> tuple[int, bool] | bool:
     
     # Por padrão começa False
     exec_succeded: bool = True    
@@ -56,7 +56,7 @@ def main(**kwargs) -> tuple[int, bool] | False:
     print(f'Iniciando extração dos dados do client: "{client_name.capitalize()}"\n') 
 
  
-    any_scraping_error: bool
+    any_scraping_error: bool = False
     if client_name == 'rech':
         scraper = RechSeleniumScrapying()
         df: DataFrame = scraper.run()
@@ -86,10 +86,11 @@ def main(**kwargs) -> tuple[int, bool] | False:
         requester = MakeSocRequests(client_name=client_name)
         df: DataFrame = requester.request_data(start_date=start_date, end_date=end_date)
 
+    # !!!!!!! melhorar esse if depois, tá mal explicado e sem retorno de variaveis, só valores esperados
     # Se o df retornou como None ou com 0 linhas, finaliza a execução
-    if df is None or df.shape[0] == 0:
+    if (df is None or df.shape[0] == 0) and not any_scraping_error:
         print("\n0 registros capitados, dados não foram salvos...")
-        return
+        return 0, True
 
     # Faz o tratamento do df, retorna já pronto pra ser salvo
     df_treated: DataFrame = DataframeTreatment.treat_df(df, client_name)
