@@ -33,7 +33,7 @@ class StoreData:
         report_type: str = None,
         should_store_where: Literal['local', 'onedrive', 'both', 'jestor'] = 'local',
         auth_token: str = None,
-        ) -> bool:
+        ) -> tuple[int, bool]:
         """
         Salva o arquivo excel com os atestados no diretório data/<client_name> e no Onedrive também
 
@@ -46,34 +46,37 @@ class StoreData:
             report_type (str): string de tipo de de dados, se são atestados de horas ou de dias
             
         Returns:
-            int: _Total de registros salvos_
+            tuple[int, bool]: _Total de registros salvos (int) e se todos os registros foram salvos ou não (bool)_
         """
         
         result: int
         match (should_store_where):
             case 'onedrive':
-                result = StoreData.store_in_onedrive(df=df, client_name=client_name,
+                total_rows_created, all_rows_were_stored = StoreData.store_in_onedrive(df=df, client_name=client_name,
                                         folder_name=folder_name,
                                         date=date, date_in_name=date_in_name, 
                                         report_type=report_type)
             case 'local':
-                result = StoreData.store_in_local_dir(df=df, client_name=client_name,
+                total_rows_created, all_rows_were_stored = StoreData.store_in_local_dir(df=df, client_name=client_name,
                                         folder_name=folder_name,
                                         date=date, date_in_name=date_in_name, 
                                         report_type=report_type)
             case 'jestor':
-                result = StoreData.store_in_jestor(df=df, client_name=client_name,
+                total_rows_created, all_rows_were_stored = StoreData.store_in_jestor(df=df, client_name=client_name,
                                         # folder_name=folder_name,
                                         # date=date, date_in_name=date_in_name, 
                                         # report_type=report_type, 
                                         auth_token=auth_token)
+                
             # case 'both':
             #     StoreData.store_in_both(df=df, client_name=client_name,
             #                             folder_name=folder_name,
             #                             date=date, date_in_name=date_in_name, 
             #                             report_type=report_type)
             
-        return result
+            
+            
+        return total_rows_created, all_rows_were_stored
 
 
     # @staticmethod
@@ -114,7 +117,7 @@ class StoreData:
         date: str = None, 
         date_in_name: bool = False, 
         report_type: str = None
-    ) -> None:
+    ) -> tuple[int, bool]:
         """
         Salva o arquivo excel com os atestados no diretório data/<client_name>
 
@@ -130,7 +133,7 @@ class StoreData:
             int: _Total de registros salvos_
         """
         
-        len_df = len(df)
+        len_df: int = len(df)
 
         date_formatter = DateFormatter()
         if date_in_name:
@@ -143,7 +146,10 @@ class StoreData:
                     
         df.to_excel(file_path, index=False, sheet_name='atestados')
         
-        return len_df
+        total_rows_created: int = len_df
+        all_rows_were_stored: bool = True
+        
+        return total_rows_created, all_rows_were_stored
 
 
     @staticmethod
@@ -154,7 +160,7 @@ class StoreData:
         date: str = None, 
         date_in_name: bool = False, 
         report_type: str = None
-    ) -> None:
+    ) -> tuple[int, bool]:
         """
         Salva o arquivo excel com os atestados no Onedrive
 
@@ -170,7 +176,7 @@ class StoreData:
             int: _Total de registros salvos_
         """
         
-        len_df = len(df)
+        len_df: int = len(df)
 
         date_formatter = DateFormatter()
         if date_in_name:
@@ -185,7 +191,10 @@ class StoreData:
         
         df.to_excel(file_path, index=False, sheet_name='atestados')
         
-        return len_df
+        total_rows_created: int = len_df
+        all_rows_were_stored: bool = True
+                
+        return total_rows_created, all_rows_were_stored
 
 
     @staticmethod
@@ -194,7 +203,7 @@ class StoreData:
         client_name: str,
         table_hash: str = JESTOR_ABSENTEISM_TABLE_HASH,
         auth_token: str = None
-    ) -> int:
+    ) -> tuple[int, bool]:
         """_summary_
 
         Args:
@@ -295,7 +304,7 @@ class StoreData:
         
         if total_rows_to_save == 0:
             print("Nenhum novo registro encontrado para envio.")
-            return 0
+            return total_rows_to_save, True
 
         # ======================================================
         # CAMPOS ADICIONAIS
@@ -319,8 +328,6 @@ class StoreData:
         # ======================================================
         # ENVIO DOS REGISTROS
         # ======================================================
-        
-        print(df_treated)
         
         total_rows_created = 0
         for index, (_, row) in enumerate(df_treated.iterrows(), start=1):
@@ -354,5 +361,12 @@ class StoreData:
 
                     if tentativa == 3:
                         print("Falha após 3 tentativas. Prosseguindo para o próximo registro.\n")
-                        
-        return total_rows_created
+            
+        # Variável que informa se todas as linhas foram salvas com sucesso no Jestor 
+        all_rows_were_stored: bool
+        if total_rows_created < len(df_treated):
+            all_rows_were_stored = False
+        else:
+            all_rows_were_stored = True
+            
+        return total_rows_created, all_rows_were_stored

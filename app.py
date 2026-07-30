@@ -67,7 +67,7 @@ def execute_report(request: ExecutionRequest):
 
     try:
         # Executa a função passando o dicionário desempacotado
-        exec_succeded: bool = main(**kwargs)
+        exec_succeded: tuple[int, bool] | bool = main(**kwargs)
     except Exception as e:
         # Se a main() der erro, a API retorna status 500 informando o que falhou
         raise HTTPException(status_code=500, detail=f"Erro interno na execução: {str(e)}")
@@ -85,11 +85,17 @@ def execute_report(request: ExecutionRequest):
             }
         )
 
+    # Se não for falso, é uma tupla com a quantidade de registros salvos e se foram todos salvos
+    rows_saved = exec_succeded[0]
+    all_rows_were_stored =  exec_succeded[1]
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
             "message": "Execução finalizada com sucesso.",
             "execution_time_seconds": execution_time,
+            "qnt_rows_stored": rows_saved,
+            "all_rows_were_stored": all_rows_were_stored,
             "parameters_used": kwargs
         }
     )

@@ -25,7 +25,7 @@ from src.helpers.tools.get_credentials import get_credentials
 from src.constants import CLIENTS_NAMES_LIST, STORAGE_PLACES_XLSX
 
 
-def main(**kwargs) -> bool:
+def main(**kwargs) -> tuple[int, bool] | False:
     
     # Por padrão começa False
     exec_succeded: bool = True    
@@ -106,9 +106,12 @@ def main(**kwargs) -> bool:
         auth_token: str | None = None
         if should_store_where == 'jestor':
             auth_token: str = get_credentials('jestor')['auth_token']
+        
+        rows_saved: int
+        all_rows_were_stored: bool
 
         storager = StoreData()
-        rows_saved: int = storager.storage_data(
+        rows_saved, all_rows_were_stored = storager.storage_data(
             df=df_treated, 
             client_name=client_name,
             folder_name=folder_name,
@@ -131,7 +134,9 @@ def main(**kwargs) -> bool:
         print(f'Erro: {e}')
         exec_succeded = False
         
-    if any_scraping_error:
-        exec_succeded = False
+    if not exec_succeded or any_scraping_error:
+        return exec_succeded
     
-    return exec_succeded
+    # Retorna a quantidade de linhas salvas e se todas elas foram salvas
+    return rows_saved, all_rows_were_stored 
+    
