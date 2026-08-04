@@ -34,7 +34,7 @@ STORAGE_PLACES_XLSX = ['local', 'onedrive', 'both', 'jestor']
 # ONEDRIVE_PATH = os.path.join(os.environ['USERPROFILE'], 'EXPERT GESTAO OCUPACIONAL E PREVIDENCIARIA LTDA', 'Expert Ocupacional Externo - SmartReports')
 
 # tabela teste 
-JESTOR_ABSENTEISM_TABLE_HASH = '86qoi45nmae4by9k46ftm'
+# JESTOR_ABSENTEISM_TABLE_HASH = '86qoi45nmae4by9k46ftm'
 
 # tabela atestados produção
-# JESTOR_ABSENTEISM_TABLE_HASH = 'e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik'
+JESTOR_ABSENTEISM_TABLE_HASH = 'e930f73a_ddac1f78__1k230gj1x6hfkgpfpbik'

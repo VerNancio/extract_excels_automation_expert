@@ -311,6 +311,9 @@ class StoreData:
         # ======================================================
         df_treated["clientes_expert"] = client_id
         df_treated["fase"] = "Aprovado"
+        
+        # Redução do DF pra testar com poucos registros, caso seja necessário
+        df_treated = df_treated.head(2)
 
         # ======================================================
         # CONFIGURAÇÃO DA API

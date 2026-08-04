@@ -42,12 +42,15 @@ def main(**kwargs) -> tuple[int, bool] | bool:
 
     date_formatter = DateFormatter()
     
-    if client_name in ['merck']:
-        start_date, end_date = handler.handle_start_end_dates('month')
+    # Caso seja necessário filtrar por datas de forma diferente, faz a comparação e retorna a data de início e fim
+    # if client_name in ['merck']:
+        # start_date, end_date = handler.handle_start_end_dates('month')
     # elif client_name in ('leroy', 'pluri', 'viva'):
         # start_date, end_date = handler.handle_start_end_dates('range_days_ago', since_days_ago=180)
-    else:
-        start_date, end_date = handler.handle_start_end_dates('day')
+    # else:
+        # start_date, end_date = handler.handle_start_end_dates('day')
+    
+    start_date, end_date = handler.handle_start_end_dates('day')
     
     # Se a data de inicio for maior que a da de fim de busca
     if date_formatter.to_datetime(start_date) > date_formatter.to_datetime(end_date):

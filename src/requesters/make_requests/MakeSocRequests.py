@@ -77,10 +77,22 @@ class MakeSocRequests:
         start_date_filter = date_formatter.days_ago(days=180)
         
         client_soc_ids: list[str]
+        request_key: str
+        request_code:str
+        
         match self.client_name:
-            case 'leroy': client_soc_ids = ['1223067']
-            case 'pluri': client_soc_ids = ['592252']
-            case 'viva': client_soc_ids = ['592278', '592279']
+            case 'leroy': 
+                client_soc_ids = ['1223067']
+                request_key = '255d744455cfd1e21b6d'
+                request_code = '218487'
+            case 'pluri': 
+                client_soc_ids = ['592252']
+                request_key = 'e0c5e1ec4799939504e6'
+                request_code = '29348'
+            case 'viva': 
+                client_soc_ids = ['592278', '592279']
+                request_key = 'e0c5e1ec4799939504e6'
+                request_code = '29348'
 
         url = "https://ws1.soc.com.br/WebSoc/exportadados"
 
@@ -88,12 +100,15 @@ class MakeSocRequests:
         for client_id in client_soc_ids:
             params = {
                 "empresa": client_id,
-                "codigo": "29348",
-                "chave": "e0c5e1ec4799939504e6",
+                "codigo": request_code,
+                "chave": request_key,
                 "tipoSaida": "json",
                 "dataInicial": start_date_filter,
                 "dataFinal": end_date_filter,
             }
+            
+            print(url)
+            print(params)
             
             res = req.post(url, params={"parametro": json.dumps(params)})
             # print('response status code:', res.text)
